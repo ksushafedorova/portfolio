@@ -7,17 +7,13 @@
 <style>
 @keyframes driftBack {
   0%   { transform: translate(0px, 0px); }
-  25%  { transform: translate(-10px, 6px); }
-  50%  { transform: translate(-18px, 10px); }
-  75%  { transform: translate(-8px, 4px); }
+  50%  { transform: translate(-16px, 8px); }
   100% { transform: translate(0px, 0px); }
 }
 
 @keyframes driftFront {
   0%   { transform: translate(0px, 0px); }
-  25%  { transform: translate(12px, -6px); }
-  50%  { transform: translate(20px, -10px); }
-  75%  { transform: translate(10px, -4px); }
+  50%  { transform: translate(14px, -6px); }
   100% { transform: translate(0px, 0px); }
 }
 
@@ -29,19 +25,14 @@ body {
   overflow-x: hidden;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* 🫧 FOAM LAYERS */
+/* 🫧 FOAM = ЧИСТАЯ СТРУКТУРА */
 
 .back-layer {
   position: fixed;
   inset: 0;
   background: url('clouds.jpg') center/cover no-repeat;
-  opacity: 0.50;
-  filter: contrast(1.6) brightness(1.05);
+  opacity: 0.55;
+  filter: contrast(1.4) brightness(1.1);
   animation: driftBack 160s ease-in-out infinite;
   z-index: -2;
 }
@@ -50,36 +41,19 @@ a {
   position: fixed;
   inset: 0;
   background: url('clouds.jpg') center/cover no-repeat;
-  opacity: 0.30;
-  filter: contrast(1.8) brightness(1.1);
+  opacity: 0.28;
+  filter: contrast(1.5) brightness(1.15);
   animation: driftFront 120s ease-in-out infinite;
   z-index: -1;
 }
 
-/* 🌫 LIGHT FIELD (ЦВЕТ В СВЕТЕ, НЕ В КАРТИНКЕ) */
+/* 🌑 ОДИН ОВЕРЛЕЙ (контроль читаемости) */
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.18);
+  background: rgba(0,0,0,0.20);
   z-index: 0;
-}
-
-.overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 40% 30%,
-      rgba(140, 180, 255, 0.18),
-      transparent 60%),
-    radial-gradient(circle at 70% 60%,
-      rgba(255, 170, 210, 0.12),
-      transparent 65%),
-    radial-gradient(circle at 50% 80%,
-      rgba(200, 255, 230, 0.08),
-      transparent 70%);
-  pointer-events: none;
 }
 
 /* CONTENT */
@@ -97,13 +71,12 @@ h1 {
   font-size: 36px;
   font-weight: normal;
   margin-bottom: 10px;
-  letter-spacing: 1px;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #e6e6e6;
   margin-bottom: 35px;
+  color: #e6e6e6;
 }
 
 .description {
