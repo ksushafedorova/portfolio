@@ -1,162 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Ksenia Fedorova</title>
+<meta charset="UTF-8">
+<title>Ksenia Fedorova</title>
 
-  <style>
-    @keyframes driftBack {
-      0%   { transform: translate(0px, 0px); }
-      50%  { transform: translate(-18px, 10px); }
-      100% { transform: translate(0px, 0px); }
-    }
+<style>
+@keyframes driftBack {
+  0%   { transform: translate(0px, 0px) scale(1.08); }
+  50%  { transform: translate(-16px, 10px) scale(1.09); }
+  100% { transform: translate(0px, 0px) scale(1.08); }
+}
 
-    @keyframes driftFront {
-      0%   { transform: translate(0px, 0px); }
-      50%  { transform: translate(20px, -10px); }
-      100% { transform: translate(0px, 0px); }
-    }
+@keyframes driftFront {
+  0%   { transform: translate(0px, 0px) scale(1.18); }
+  50%  { transform: translate(14px, -8px) scale(1.2); }
+  100% { transform: translate(0px, 0px) scale(1.18); }
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: #f2f2f2;
-      background: #000;
-      overflow-x: hidden;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #d6d7db;
+  background: #000;
+  overflow-x: hidden;
+}
 
-    a {
-      color: #f2f2f2;
-      text-decoration: none;
-    }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-    /* CLOUD LAYERS */
+/* 🫧 FOAM */
 
-    .back-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('clouds.jpg') center/cover no-repeat;
-      opacity: 0.45;
-      filter: contrast(1.5) brightness(1.15);
-      animation: driftBack 140s ease-in-out infinite;
-      z-index: -2;
-    }
+.back-layer {
+  position: fixed;
+  inset: 0;
+  background: url('clouds.jpg') center/cover no-repeat;
+  opacity: 0.52;
+  filter: contrast(1.45) brightness(1.1);
+  animation: driftBack 180s ease-in-out infinite;
+  z-index: -2;
+}
 
-    .front-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('clouds.jpg') center/cover no-repeat;
-      opacity: 0.25;
-      filter: contrast(1.6) brightness(1.2);
-      animation: driftFront 100s ease-in-out infinite;
-      z-index: -1;
-    }
+.front-layer {
+  position: fixed;
+  inset: 0;
+  background: url('clouds.jpg') center/cover no-repeat;
+  opacity: 0.25;
+  filter: contrast(1.6) brightness(1.15);
+  animation: driftFront 140s ease-in-out infinite;
+  z-index: -1;
+}
 
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.28);
-      z-index: 0;
-    }
+/* 🌑 CONTROL LAYER */
 
-    /* CONTENT */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.22);
+  z-index: 0;
+}
 
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 110px 40px;
-      text-align: center;
-    }
+/* CONTENT */
 
-    h1 {
-      font-size: 36px;
-      font-weight: normal;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-    }
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 110px 40px;
+  text-align: center;
+}
 
-    .subtitle {
-      font-size: 16px;
-      color: #e6e6e6;
-      margin-bottom: 35px;
-    }
+h1 {
+  font-size: 36px;
+  font-weight: normal;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
 
-    .description {
-      font-size: 15px;
-      line-height: 1.7;
-      color: #d0d0d0;
-      margin-bottom: 70px;
-    }
+.subtitle {
+  font-size: 16px;
+  margin-bottom: 35px;
+  opacity: 0.9;
+}
 
-    /* STAY SOUND */
+.description {
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 70px;
+  opacity: 0.85;
+}
 
-    .stay-sound {
-      display: inline-block;
-      cursor: pointer;
-      font-size: 13px;
-      letter-spacing: 3px;
-      color: #d8d8d8;
-      opacity: 0.75;
-      transition: opacity 0.3s ease;
-      margin-bottom: 20px;
-    }
+/* 🌫 STAY SOUND — “ВСПЛЫТИЕ” */
 
-    .stay-sound:hover {
-      opacity: 1;
-    }
+.stay-sound {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 3px;
 
-    /* DROPDOWN */
+  opacity: 0.55;
+  transform: translateY(6px);
 
-    .dropdown {
-      margin-top: 20px;
-      opacity: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition:
-        opacity 0.8s ease,
-        max-height 1s ease;
-    }
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  margin-bottom: 20px;
+}
 
-    .dropdown.open {
-      opacity: 1;
-      max-height: 500px;
-    }
+.stay-sound:hover {
+  opacity: 1;
+  transform: translateY(0px);
+}
 
-    .dropdown a {
-      display: block;
-      margin: 14px 0;
-      font-size: 15px;
-      letter-spacing: 2px;
-      opacity: 0.82;
-      transition: opacity 0.3s ease;
-    }
+/* при открытии меню — он чуть “всплывает” */
+.stay-sound.active {
+  opacity: 1;
+  transform: translateY(-2px);
+}
 
-    .dropdown a:hover {
-      opacity: 1;
-    }
-  </style>
+/* DROPDOWN */
+
+.dropdown {
+  margin-top: 20px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: 0.8s ease;
+}
+
+.dropdown.open {
+  opacity: 1;
+  max-height: 500px;
+}
+
+.dropdown a {
+  display: block;
+  margin: 14px 0;
+  font-size: 15px;
+  letter-spacing: 2px;
+  opacity: 0.85;
+}
+
+.dropdown a:hover {
+  opacity: 1;
+}
+</style>
 </head>
 
 <body>
 
-<!-- CLOUD LAYERS -->
-
 <div class="back-layer"></div>
 <div class="front-layer"></div>
 <div class="overlay"></div>
-
-<!-- INDEX -->
 
 <main>
 
@@ -171,43 +166,24 @@
     My practice combines voice, piano, electronics and field recordings.
   </div>
 
-  <!-- STAY SOUND -->
-
-  <div class="stay-sound" onclick="toggleMenu()">
+  <div class="stay-sound" id="stay" onclick="toggleMenu()">
     STAY SOUND +
   </div>
 
-  <!-- TRACE ZONES -->
-
   <div class="dropdown" id="dropdown">
-
-    <a href="theatre.html">
-      THEATRE TRACE
-    </a>
-
-    <a href="film.html">
-      FILM TRACE
-    </a>
-
-    <a href="sound.html">
-      SOUND TRACE
-    </a>
-
-    <a href="fragments.html">
-      FRAGMENTS
-    </a>
-
+    <a href="theatre.html">THEATRE TRACE</a>
+    <a href="film.html">FILM TRACE</a>
+    <a href="sound.html">SOUND TRACE</a>
+    <a href="fragments.html">FRAGMENTS</a>
   </div>
 
 </main>
 
 <script>
-  function toggleMenu() {
-    document
-      .getElementById('dropdown')
-      .classList
-      .toggle('open');
-  }
+function toggleMenu() {
+  document.getElementById('dropdown').classList.toggle('open');
+  document.getElementById('stay').classList.toggle('active');
+}
 </script>
 
 </body>
