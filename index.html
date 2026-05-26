@@ -17,41 +17,18 @@
       100% { transform: translate(0px, 0px); }
     }
 
-    /* INTRO */
-    .intro {
-      position: fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background: rgba(0,0,0,0.65);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      cursor:pointer;
-      z-index:10;
-      transition: opacity 1s ease;
+    a {
+      color: #f2f2f2;
+      text-decoration: none;
+      letter-spacing: 2px;
+      display: block;
+      margin: 10px 0;
+      font-size: 15px;
+      opacity: 0.85;
     }
 
-    .intro-title {
-      font-size:14px;
-      letter-spacing:4px;
-      color:#f2f2f2;
-      opacity:0.9;
-    }
-
-    .intro-sub {
-      margin-top:10px;
-      font-size:11px;
-      letter-spacing:2px;
-      color:#aaa;
-      opacity:0.7;
-    }
-
-    .hidden {
-      opacity:0;
-      pointer-events:none;
+    a:hover {
+      opacity: 1;
     }
   </style>
 </head>
@@ -64,7 +41,8 @@
   overflow-x:hidden;
 ">
 
-<!-- BACK LAYER -->
+<!-- 🌫 CLOUD LAYERS (ФОН, ЭТО СИСТЕМА, НЕ КНОПКА) -->
+
 <div style="
   position:fixed;
   top:0;
@@ -78,7 +56,6 @@
   z-index:-2;
 "></div>
 
-<!-- FRONT LAYER -->
 <div style="
   position:fixed;
   top:0;
@@ -92,7 +69,6 @@
   z-index:-1;
 "></div>
 
-<!-- OVERLAY -->
 <div style="
   position:fixed;
   top:0;
@@ -103,60 +79,74 @@
   z-index:0;
 "></div>
 
-<!-- INTRO SCREEN -->
-<div class="intro" id="intro" onclick="enterSite()">
-  <div class="intro-title">STAY SOUND</div>
-  <div class="intro-sub">click to enter</div>
-</div>
+<!-- 🌫 INDEX / ВХОД -->
 
-<!-- MAIN CONTENT -->
-<main id="content" style="
+<main style="
   position:relative;
   z-index:1;
   max-width:800px;
   margin:0 auto;
   padding:100px 40px;
   text-align:center;
-  opacity:0;
-  transition: opacity 1s ease;
 ">
 
-  <h1 style="font-size:36px; font-weight:normal; margin-bottom:10px;">
+  <!-- ИМЯ (как ты хотела — чисто и в картинке) -->
+  <h1 style="
+    font-size:36px;
+    font-weight:normal;
+    margin-bottom:10px;
+  ">
     Ksenia Fedorova
   </h1>
 
-  <p style="font-size:16px; color:#e6e6e6; margin-bottom:10px;">
-    composer / sound artist / theatre & film music
+  <p style="
+    font-size:16px;
+    color:#e6e6e6;
+    margin-bottom:5px;
+  ">
+    composer / sound artist
   </p>
 
-  <p style="font-size:15px; line-height:1.6; color:#d0d0d0; margin-bottom:60px;">
+  <!-- 🌫 STAY SOUND (как состояние, не кнопка) -->
+  <p style="
+    font-size:11px;
+    letter-spacing:3px;
+    color:#aaa;
+    opacity:0.6;
+    margin-bottom:40px;
+  ">
+    stay sound
+  </p>
+
+  <p style="
+    font-size:15px;
+    line-height:1.6;
+    color:#d0d0d0;
+    margin-bottom:60px;
+  ">
     I work with theatre, film, animation and experimental sound.
     My practice combines voice, piano, electronics and field recordings.
   </p>
 
-  <hr style="border:none; border-top:1px solid rgba(255,255,255,0.2); margin:40px 0;">
+  <hr style="
+    border:none;
+    border-top:1px solid rgba(255,255,255,0.2);
+    margin:40px 0;
+  ">
 
-  <p style="font-size:12px; letter-spacing:1px; color:#aaa; margin-bottom:15px;">
-    CLOUD LAYERS
-  </p>
+  <!-- 🧩 TRACE = ГЛАВНЫЙ ВХОД В РАБОТЫ -->
+  <nav>
 
-  <nav style="display:flex; justify-content:center; gap:18px; flex-wrap:wrap;">
+    <a href="trace.html">TRACE ARCHIVE</a>
 
-    <a href="theatre.html" style="color:#f2f2f2; text-decoration:none;">Theatre</a>
-    <a href="film.html" style="color:#f2f2f2; text-decoration:none;">Film</a>
-    <a href="sound.html" style="color:#f2f2f2; text-decoration:none;">Sound</a>
-    <a href="trace.html" style="color:#ffffff; text-decoration:underline;">Trace</a>
+    <!-- вторичный слой -->
+    <a href="theatre.html" style="opacity:0.7;">Theatre</a>
+    <a href="film.html" style="opacity:0.7;">Film</a>
+    <a href="sound.html" style="opacity:0.7;">Sound</a>
 
   </nav>
 
 </main>
-
-<script>
-  function enterSite() {
-    document.getElementById("intro").classList.add("hidden");
-    document.getElementById("content").style.opacity = "1";
-  }
-</script>
 
 </body>
 </html>
