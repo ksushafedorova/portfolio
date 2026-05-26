@@ -21,7 +21,7 @@
       margin: 0;
       font-family: Arial, sans-serif;
       color: #f2f2f2;
-      background: #000;
+      background: #07080c;
       overflow-x: hidden;
     }
 
@@ -30,7 +30,7 @@
       text-decoration: none;
     }
 
-    /* CLOUD LAYERS */
+    /* CLOUD LAYERS (COLOR VERSION) */
 
     .back-layer {
       position: fixed;
@@ -39,8 +39,8 @@
       width: 100%;
       height: 100%;
       background: url('clouds.jpg') center/cover no-repeat;
-      opacity: 0.45;
-      filter: contrast(1.5) brightness(1.15);
+      opacity: 0.50;
+      filter: contrast(1.2) brightness(1.25) sepia(0.15) saturate(1.4);
       animation: driftBack 140s ease-in-out infinite;
       z-index: -2;
     }
@@ -52,11 +52,13 @@
       width: 100%;
       height: 100%;
       background: url('clouds.jpg') center/cover no-repeat;
-      opacity: 0.25;
-      filter: contrast(1.6) brightness(1.2);
+      opacity: 0.30;
+      filter: contrast(1.25) brightness(1.3) sepia(0.1) saturate(1.5);
       animation: driftFront 100s ease-in-out infinite;
       z-index: -1;
     }
+
+    /* LIGHT FIELD */
 
     .overlay {
       position: fixed;
@@ -64,8 +66,21 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.28);
+      background: rgba(0,0,0,0.18);
       z-index: 0;
+    }
+
+    .overlay::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at 50% 30%,
+        rgba(120, 150, 255, 0.18),
+        rgba(255, 180, 220, 0.10),
+        transparent 65%
+      );
+      pointer-events: none;
     }
 
     /* CONTENT */
@@ -123,9 +138,7 @@
       opacity: 0;
       max-height: 0;
       overflow: hidden;
-      transition:
-        opacity 0.8s ease,
-        max-height 1s ease;
+      transition: opacity 0.8s ease, max-height 1s ease;
     }
 
     .dropdown.open {
@@ -150,14 +163,12 @@
 
 <body>
 
-<!-- CLOUD LAYERS -->
-
+<!-- CLOUDS -->
 <div class="back-layer"></div>
 <div class="front-layer"></div>
 <div class="overlay"></div>
 
-<!-- INDEX -->
-
+<!-- CONTENT -->
 <main>
 
   <h1>Ksenia Fedorova</h1>
@@ -177,25 +188,14 @@
     STAY SOUND +
   </div>
 
-  <!-- TRACE ZONES -->
+  <!-- TRACE MENU -->
 
   <div class="dropdown" id="dropdown">
 
-    <a href="theatre.html">
-      THEATRE TRACE
-    </a>
-
-    <a href="film.html">
-      FILM TRACE
-    </a>
-
-    <a href="sound.html">
-      SOUND TRACE
-    </a>
-
-    <a href="fragments.html">
-      FRAGMENTS
-    </a>
+    <a href="theatre.html">THEATRE TRACE</a>
+    <a href="film.html">FILM TRACE</a>
+    <a href="sound.html">SOUND TRACE</a>
+    <a href="fragments.html">FRAGMENTS</a>
 
   </div>
 
@@ -203,10 +203,7 @@
 
 <script>
   function toggleMenu() {
-    document
-      .getElementById('dropdown')
-      .classList
-      .toggle('open');
+    document.getElementById('dropdown').classList.toggle('open');
   }
 </script>
 
