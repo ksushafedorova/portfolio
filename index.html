@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stay Sound</title>
+  <title>Ksenia Fedorova</title>
 
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      overflow: hidden;
       background: black;
       color: white;
+      overflow: hidden;
     }
 
-    /* ОБЛАКА ФОН */
+    /* ОБЛАКА — СРЕДА */
     .bg {
       position: fixed;
       top: 0;
@@ -24,72 +24,72 @@
       background-size: cover;
       background-position: center;
       opacity: 0.35;
-      animation: drift 25s linear infinite;
+      animation: drift 30s ease-in-out infinite;
       filter: blur(0.5px);
+      z-index: 0;
     }
 
     @keyframes drift {
       0% { transform: translate(0, 0); }
-      50% { transform: translate(-3%, -2%); }
+      50% { transform: translate(-2%, -1.5%); }
       100% { transform: translate(0, 0); }
     }
 
-    /* ВХОД */
-    .enter {
-      position: fixed;
-      width: 100%;
-      height: 100%;
+    /* ОСНОВНОЙ СЛОЙ */
+    .overlay {
+      position: relative;
+      z-index: 2;
+      height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
       flex-direction: column;
-      cursor: pointer;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-      z-index: 10;
     }
 
-    .title {
-      font-size: 16px;
-      letter-spacing: 4px;
-      opacity: 0.8;
+    /* ИМЯ */
+    .name {
+      font-size: 18px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      opacity: 0.9;
     }
 
-    .subtitle {
-      margin-top: 20px;
+    /* ПОДПИСЬ */
+    .role {
       font-size: 12px;
-      opacity: 0.4;
+      opacity: 0.5;
+      margin-bottom: 40px;
     }
 
-    /* МЕНЮ (скрыто сначала) */
+    /* СИСТЕМА МЕНЮ */
     .menu {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      display: none;
-      align-items: center;
-      justify-content: center;
+      display: flex;
       flex-direction: column;
-      z-index: 20;
-      text-align: center;
+      gap: 12px;
     }
 
     .menu a {
       color: white;
       text-decoration: none;
-      margin: 10px;
-      font-size: 18px;
+      font-size: 16px;
       letter-spacing: 2px;
-      opacity: 0.85;
+      opacity: 0.8;
+      transition: 0.2s;
     }
 
     .menu a:hover {
       opacity: 1;
+      transform: scale(1.02);
     }
 
-    .small {
-      font-size: 12px;
-      opacity: 0.5;
-      margin-bottom: 30px;
+    /* МАЛЕНЬКАЯ ПОЭЗИЯ (stay sound) */
+    .hint {
+      position: absolute;
+      bottom: 30px;
+      font-size: 11px;
+      opacity: 0.35;
+      letter-spacing: 2px;
     }
   </style>
 </head>
@@ -98,30 +98,21 @@
 
 <div class="bg"></div>
 
-<!-- ВХОД -->
-<div class="enter" id="enter" onclick="enterSite()">
-  <div class="title">STAY SOUND</div>
-  <div class="subtitle">click to enter</div>
-</div>
+<div class="overlay">
 
-<!-- МЕНЮ -->
-<div class="menu" id="menu">
+  <div class="name">KSENIA FEDOROVA</div>
+  <div class="role">composer / sound artist</div>
 
-  <div class="small">CLOUD LAYERS</div>
+  <div class="menu">
+    <a href="theatre.html">CLOUD / THEATRE TRACE</a>
+    <a href="film.html">CLOUD / FILM TRACE</a>
+    <a href="sound.html">CLOUD / SOUND MATTER</a>
+    <a href="trace.html">TRACE ARCHIVE</a>
+  </div>
 
-  <a href="trace.html">TRACE</a>
-  <a href="theatre.html">THEATRE</a>
-  <a href="film.html">FILM</a>
-  <a href="sound.html">SOUND</a>
+  <div class="hint">stay sound</div>
 
 </div>
-
-<script>
-  function enterSite() {
-    document.getElementById("enter").style.display = "none";
-    document.getElementById("menu").style.display = "flex";
-  }
-</script>
 
 </body>
 </html>
