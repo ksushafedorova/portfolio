@@ -1,151 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Ksenia Fedorova</title>
+<meta charset="UTF-8">
+<title>Ksenia Fedorova</title>
 
-  <style>
-    @keyframes driftBack {
-      0%   { transform: translate(0px, 0px); }
-      50%  { transform: translate(-18px, 10px); }
-      100% { transform: translate(0px, 0px); }
-    }
+<style>
+@keyframes driftBack {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(-10px, 6px); }
+  50%  { transform: translate(-18px, 10px); }
+  75%  { transform: translate(-8px, 4px); }
+  100% { transform: translate(0px, 0px); }
+}
 
-    @keyframes driftFront {
-      0%   { transform: translate(0px, 0px); }
-      50%  { transform: translate(20px, -10px); }
-      100% { transform: translate(0px, 0px); }
-    }
+@keyframes driftFront {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(12px, -6px); }
+  50%  { transform: translate(20px, -10px); }
+  75%  { transform: translate(10px, -4px); }
+  100% { transform: translate(0px, 0px); }
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: #f2f2f2;
-      background: #0b0b10;
-      overflow-x: hidden;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #f2f2f2;
+  background: #0b0b10;
+  overflow-x: hidden;
+}
 
-    a {
-      color: #f2f2f2;
-      text-decoration: none;
-    }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-    /* CLOUD LAYERS */
+/* 🫧 FOAM LAYERS */
 
-    .back-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('clouds.jpg') center/cover no-repeat;
-      opacity: 0.45;
-      filter: contrast(1.35) brightness(1.15);
-      animation: driftBack 140s ease-in-out infinite;
-      z-index: -2;
-    }
+.back-layer {
+  position: fixed;
+  inset: 0;
+  background: url('clouds.jpg') center/cover no-repeat;
+  opacity: 0.50;
+  filter: contrast(1.6) brightness(1.05);
+  animation: driftBack 160s ease-in-out infinite;
+  z-index: -2;
+}
 
-    .front-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('clouds.jpg') center/cover no-repeat;
-      opacity: 0.25;
-      filter: contrast(1.45) brightness(1.2);
-      animation: driftFront 100s ease-in-out infinite;
-      z-index: -1;
-    }
+.front-layer {
+  position: fixed;
+  inset: 0;
+  background: url('clouds.jpg') center/cover no-repeat;
+  opacity: 0.30;
+  filter: contrast(1.8) brightness(1.1);
+  animation: driftFront 120s ease-in-out infinite;
+  z-index: -1;
+}
 
-    /* OVERLAY (без цвета, только глубина) */
+/* 🌫 LIGHT FIELD (ЦВЕТ В СВЕТЕ, НЕ В КАРТИНКЕ) */
 
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.16);
-      z-index: 0;
-    }
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 0;
+}
 
-    /* CONTENT */
+.overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 40% 30%,
+      rgba(140, 180, 255, 0.18),
+      transparent 60%),
+    radial-gradient(circle at 70% 60%,
+      rgba(255, 170, 210, 0.12),
+      transparent 65%),
+    radial-gradient(circle at 50% 80%,
+      rgba(200, 255, 230, 0.08),
+      transparent 70%);
+  pointer-events: none;
+}
 
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 110px 40px;
-      text-align: center;
-    }
+/* CONTENT */
 
-    h1 {
-      font-size: 36px;
-      font-weight: normal;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-    }
+main {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 110px 40px;
+  text-align: center;
+}
 
-    .subtitle {
-      font-size: 16px;
-      color: #e6e6e6;
-      margin-bottom: 35px;
-    }
+h1 {
+  font-size: 36px;
+  font-weight: normal;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
 
-    .description {
-      font-size: 15px;
-      line-height: 1.7;
-      color: #d0d0d0;
-      margin-bottom: 70px;
-    }
+.subtitle {
+  font-size: 16px;
+  color: #e6e6e6;
+  margin-bottom: 35px;
+}
 
-    /* STAY SOUND */
+.description {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #d0d0d0;
+  margin-bottom: 70px;
+}
 
-    .stay-sound {
-      display: inline-block;
-      cursor: pointer;
-      font-size: 13px;
-      letter-spacing: 3px;
-      color: #d8d8d8;
-      opacity: 0.75;
-      transition: opacity 0.3s ease;
-      margin-bottom: 20px;
-    }
+/* STAY SOUND */
 
-    .stay-sound:hover {
-      opacity: 1;
-    }
+.stay-sound {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 3px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
 
-    /* DROPDOWN */
+/* DROPDOWN */
 
-    .dropdown {
-      margin-top: 20px;
-      opacity: 0;
-      max-height: 0;
-      overflow: hidden;
-      transition: opacity 0.8s ease, max-height 1s ease;
-    }
+.dropdown {
+  margin-top: 20px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: 0.8s ease;
+}
 
-    .dropdown.open {
-      opacity: 1;
-      max-height: 500px;
-    }
+.dropdown.open {
+  opacity: 1;
+  max-height: 500px;
+}
 
-    .dropdown a {
-      display: block;
-      margin: 14px 0;
-      font-size: 15px;
-      letter-spacing: 2px;
-      opacity: 0.82;
-      transition: opacity 0.3s ease;
-    }
+.dropdown a {
+  display: block;
+  margin: 14px 0;
+  font-size: 15px;
+  letter-spacing: 2px;
+  opacity: 0.85;
+}
 
-    .dropdown a:hover {
-      opacity: 1;
-    }
-  </style>
+.dropdown a:hover {
+  opacity: 1;
+}
+</style>
 </head>
 
 <body>
@@ -172,20 +177,18 @@
   </div>
 
   <div class="dropdown" id="dropdown">
-
     <a href="theatre.html">THEATRE TRACE</a>
     <a href="film.html">FILM TRACE</a>
     <a href="sound.html">SOUND TRACE</a>
     <a href="fragments.html">FRAGMENTS</a>
-
   </div>
 
 </main>
 
 <script>
-  function toggleMenu() {
-    document.getElementById('dropdown').classList.toggle('open');
-  }
+function toggleMenu() {
+  document.getElementById('dropdown').classList.toggle('open');
+}
 </script>
 
 </body>
