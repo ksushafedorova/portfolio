@@ -6,15 +6,19 @@
 
 <style>
 @keyframes driftBack {
-  0%   { transform: translate(0px, 0px) scale(1.08); }
-  50%  { transform: translate(-16px, 10px) scale(1.09); }
-  100% { transform: translate(0px, 0px) scale(1.08); }
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(-12px, 6px); }
+  50%  { transform: translate(-18px, 10px); }
+  75%  { transform: translate(-8px, 4px); }
+  100% { transform: translate(0px, 0px); }
 }
 
 @keyframes driftFront {
-  0%   { transform: translate(0px, 0px) scale(1.18); }
-  50%  { transform: translate(14px, -8px) scale(1.2); }
-  100% { transform: translate(0px, 0px) scale(1.18); }
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(10px, -5px); }
+  50%  { transform: translate(14px, -8px); }
+  75%  { transform: translate(8px, -3px); }
+  100% { transform: translate(0px, 0px); }
 }
 
 body {
@@ -30,7 +34,7 @@ a {
   text-decoration: none;
 }
 
-/* 🫧 FOAM */
+/* 🫧 CLOUD FOAM */
 
 .back-layer {
   position: fixed;
@@ -52,7 +56,7 @@ a {
   z-index: -1;
 }
 
-/* 🌑 CONTROL LAYER */
+/* 🌑 CONTROL */
 
 .overlay {
   position: fixed;
@@ -92,30 +96,25 @@ h1 {
   opacity: 0.85;
 }
 
-/* 🌫 STAY SOUND — “ВСПЛЫТИЕ” */
+/* 🫧 STAY SOUND */
 
 .stay-sound {
   display: inline-block;
   cursor: pointer;
   font-size: 13px;
   letter-spacing: 3px;
-
-  opacity: 0.55;
-  transform: translateY(6px);
-
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
   margin-bottom: 20px;
 }
 
 .stay-sound:hover {
   opacity: 1;
-  transform: translateY(0px);
 }
 
-/* при открытии меню — он чуть “всплывает” */
+/* лёгкое “всплытие” при открытии */
 .stay-sound.active {
   opacity: 1;
-  transform: translateY(-2px);
 }
 
 /* DROPDOWN */
