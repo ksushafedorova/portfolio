@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Ksenia Fedorova</title>
+  <style>
+@keyframes drift {
+  0% {
+    background-position: 50% 50%;
+  }
+  50% {
+    background-position: 55% 45%;
+  }
+  100% {
+    background-position: 50% 50%;
+  }
+}
+</style>
 </head>
 
 <body style="
@@ -10,11 +23,10 @@
   font-family: Arial;
   color:#f2f2f2;
   background-image: url('clouds.jpg');
-  background-size: cover;
+  background-size: 120% 120%;
   background-position: center;
-  background-attachment: fixed;
+  animation: drift 60s ease-in-out infinite;
 ">
-
 <!-- DARK OVERLAY -->
 <div style="
   position:fixed;
