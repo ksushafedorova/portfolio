@@ -5,17 +5,16 @@
   <title>Ksenia Fedorova</title>
 
   <style>
-    /* 2 слоя движения = глубина */
     @keyframes driftBack {
-      0%   { transform: translate(0px, 0px) scale(1.05); }
-      50%  { transform: translate(-30px, 20px) scale(1.05); }
-      100% { transform: translate(0px, 0px) scale(1.05); }
+      0%   { transform: translate(0px, 0px) scale(1.08); }
+      50%  { transform: translate(-40px, 20px) scale(1.08); }
+      100% { transform: translate(0px, 0px) scale(1.08); }
     }
 
     @keyframes driftFront {
-      0%   { transform: translate(0px, 0px) scale(1.1); }
-      50%  { transform: translate(40px, -20px) scale(1.1); }
-      100% { transform: translate(0px, 0px) scale(1.1); }
+      0%   { transform: translate(0px, 0px) scale(1.12); }
+      50%  { transform: translate(50px, -25px) scale(1.12); }
+      100% { transform: translate(0px, 0px) scale(1.12); }
     }
   </style>
 </head>
@@ -36,8 +35,9 @@
   width:120%;
   height:120%;
   background:url('clouds.jpg') center/cover no-repeat;
-  opacity:0.20;
-  animation: driftBack 90s ease-in-out infinite;
+  opacity:0.38;
+  filter: contrast(1.25) brightness(1.15);
+  animation: driftBack 100s ease-in-out infinite;
   z-index:-2;
 "></div>
 
@@ -49,19 +49,20 @@
   width:120%;
   height:120%;
   background:url('clouds.jpg') center/cover no-repeat;
-  opacity:0.12;
-  animation: driftFront 70s ease-in-out infinite;
+  opacity:0.22;
+  filter: contrast(1.3) brightness(1.2);
+  animation: driftFront 75s ease-in-out infinite;
   z-index:-1;
 "></div>
 
-<!-- DARK OVERLAY -->
+<!-- DARK OVERLAY (ослабленный, чтобы не убивать рисунок) -->
 <div style="
   position:fixed;
   top:0;
   left:0;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,0.55);
+  background:rgba(0,0,0,0.32);
   z-index:0;
 "></div>
 
@@ -79,11 +80,11 @@
     Ksenia Fedorova
   </h1>
 
-  <p style="font-size:16px; color:#ddd; margin-bottom:30px;">
+  <p style="font-size:16px; color:#e6e6e6; margin-bottom:30px;">
     composer / sound artist / theatre & film music
   </p>
 
-  <p style="font-size:15px; line-height:1.6; color:#ccc; margin-bottom:60px;">
+  <p style="font-size:15px; line-height:1.6; color:#d0d0d0; margin-bottom:60px;">
     I work with theatre, film, animation and experimental sound.
     My practice combines voice, piano, electronics and field recordings.
   </p>
