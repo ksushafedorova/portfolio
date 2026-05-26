@@ -2,108 +2,126 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ksenia Fedorova</title>
+  <title>Stay Sound</title>
 
   <style>
-    @keyframes driftBack {
-      0%   { transform: translate(0px, 0px); }
-      50%  { transform: translate(-18px, 10px); }
-      100% { transform: translate(0px, 0px); }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      background: black;
+      color: white;
     }
 
-    @keyframes driftFront {
-      0%   { transform: translate(0px, 0px); }
-      50%  { transform: translate(20px, -10px); }
-      100% { transform: translate(0px, 0px); }
+    /* ОБЛАКА ФОН */
+    .bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 120%;
+      height: 120%;
+      background-image: url("clouds.jpg");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.35;
+      animation: drift 25s linear infinite;
+      filter: blur(0.5px);
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0); }
+      50% { transform: translate(-3%, -2%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ВХОД */
+    .enter {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .title {
+      font-size: 16px;
+      letter-spacing: 4px;
+      opacity: 0.8;
+    }
+
+    .subtitle {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.4;
+    }
+
+    /* МЕНЮ (скрыто сначала) */
+    .menu {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 20;
+      text-align: center;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      margin: 10px;
+      font-size: 18px;
+      letter-spacing: 2px;
+      opacity: 0.85;
+    }
+
+    .menu a:hover {
+      opacity: 1;
+    }
+
+    .small {
+      font-size: 12px;
+      opacity: 0.5;
+      margin-bottom: 30px;
     }
   </style>
 </head>
 
-<body style="
-  margin:0;
-  font-family: Arial;
-  color:#f2f2f2;
-  background:#000;
-  overflow-x:hidden;
-">
+<body>
 
-<!-- BACK LAYER (чёткий рисунок, без repeat) -->
-<div style="
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:url('clouds.jpg') center/cover no-repeat;
-  opacity:0.45;
-  filter: contrast(1.5) brightness(1.15);
-  animation: driftBack 140s ease-in-out infinite;
-  z-index:-2;
-"></div>
+<div class="bg"></div>
 
-<!-- FRONT LAYER (лёгкая глубина) -->
-<div style="
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:url('clouds.jpg') center/cover no-repeat;
-  opacity:0.25;
-  filter: contrast(1.6) brightness(1.2);
-  animation: driftFront 100s ease-in-out infinite;
-  z-index:-1;
-"></div>
+<!-- ВХОД -->
+<div class="enter" id="enter" onclick="enterSite()">
+  <div class="title">STAY SOUND</div>
+  <div class="subtitle">click to enter</div>
+</div>
 
-<!-- OVERLAY (очень мягкий, чтобы не убить рисунок) -->
-<div style="
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.28);
-  z-index:0;
-"></div>
+<!-- МЕНЮ -->
+<div class="menu" id="menu">
 
-<!-- CONTENT -->
-<main style="
-  position:relative;
-  z-index:1;
-  max-width:800px;
-  margin:0 auto;
-  padding:100px 40px;
-  text-align:center;
-">
+  <div class="small">CLOUD LAYERS</div>
 
-  <h1 style="font-size:36px; font-weight:normal; margin-bottom:10px;">
-    Ksenia Fedorova
-  </h1>
+  <a href="trace.html">TRACE</a>
+  <a href="theatre.html">THEATRE</a>
+  <a href="film.html">FILM</a>
+  <a href="sound.html">SOUND</a>
 
-  <p style="font-size:16px; color:#e6e6e6; margin-bottom:30px;">
-    composer / sound artist / theatre & film music
-  </p>
+</div>
 
-  <p style="font-size:15px; line-height:1.6; color:#d0d0d0; margin-bottom:60px;">
-    I work with theatre, film, animation and experimental sound.
-    My practice combines voice, piano, electronics and field recordings.
-  </p>
-
-  <hr style="border:none; border-top:1px solid rgba(255,255,255,0.2); margin:40px 0;">
-
-  <p style="font-size:12px; letter-spacing:1px; color:#aaa; margin-bottom:15px;">
-    MENU
-  </p>
-
-  <nav style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap;">
-    <a href="index.html" style="color:#f2f2f2; text-decoration:none;">Home</a>
-    <a href="theatre.html" style="color:#f2f2f2; text-decoration:none;">Theatre</a>
-    <a href="film.html" style="color:#f2f2f2; text-decoration:none;">Film</a>
-    <a href="experimental.html" style="color:#f2f2f2; text-decoration:none;">Experimental</a>
-    <a href="contact.html" style="color:#f2f2f2; text-decoration:none;">Contact</a>
-  </nav>
-
-</main>
+<script>
+  function enterSite() {
+    document.getElementById("enter").style.display = "none";
+    document.getElementById("menu").style.display = "flex";
+  }
+</script>
 
 </body>
 </html>
