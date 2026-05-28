@@ -7,13 +7,13 @@
 <style>
 @keyframes driftBack {
   0%   { transform: translate(0px, 0px); }
-  50%  { transform: translate(-18px, 10px); }
+  50%  { transform: translate(-10px, 6px); }
   100% { transform: translate(0px, 0px); }
 }
 
 @keyframes driftFront {
   0%   { transform: translate(0px, 0px); }
-  50%  { transform: translate(20px, -10px); }
+  50%  { transform: translate(12px, -6px); }
   100% { transform: translate(0px, 0px); }
 }
 
@@ -25,46 +25,49 @@ body {
   overflow-x: hidden;
 }
 
-/* LINKS */
-
 a {
   color: #f2f2f2;
   text-decoration: none;
 }
 
-/* 🌫️ BASE CLOUD LAYERS */
+/* 🌫️ CLOUD LAYERS */
 
-.back-layer,
-.front-layer {
+.back-layer {
   position: fixed;
-  top: -30px;
-  left: -30px;
-  width: calc(100% + 60px);
-  height: calc(100% + 60px);
+  top: -40px;
+  left: -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 80px);
 
   background: url('clouds.jpg') center/cover no-repeat;
 
-  will-change: transform;
+  opacity: 0.42;
+  filter: contrast(1.4) brightness(1.12);
 
-  transition: transform 0.25s ease-out;
-}
+  animation: driftBack 240s ease-in-out infinite;
 
-/* BACK */
-
-.back-layer {
-  opacity: 0.45;
-  filter: contrast(1.5) brightness(1.15);
-  animation: driftBack 140s ease-in-out infinite;
   z-index: -2;
-}
 
-/* FRONT */
+  will-change: transform;
+}
 
 .front-layer {
+  position: fixed;
+  top: -40px;
+  left: -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 80px);
+
+  background: url('clouds.jpg') center/cover no-repeat;
+
   opacity: 0.25;
-  filter: contrast(1.6) brightness(1.2);
-  animation: driftFront 100s ease-in-out infinite;
+  filter: contrast(1.55) brightness(1.15);
+
+  animation: driftFront 180s ease-in-out infinite;
+
   z-index: -1;
+
+  will-change: transform;
 }
 
 /* OVERLAY */
@@ -107,7 +110,7 @@ h1 {
   margin-bottom: 70px;
 }
 
-/* 🫧 STAY SOUND */
+/* STAY SOUND */
 
 .stay-sound {
   display: inline-block;
@@ -119,7 +122,8 @@ h1 {
   opacity: 0.7;
   transform: translateY(4px);
 
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
   margin-bottom: 20px;
 }
 
@@ -201,7 +205,7 @@ function toggleMenu() {
   document.getElementById('stay').classList.toggle('active');
 }
 
-/* 🌫️ REACTIVE ENVIRONMENT (NO EFFECTS, ONLY WIND SHIFT) */
+/* 🌫️ STRONG REACTIVE FIELD */
 
 const back = document.getElementById('back');
 const front = document.getElementById('front');
@@ -215,16 +219,22 @@ document.addEventListener('mousemove', (e) => {
   const x = (e.clientX / window.innerWidth - 0.5);
   const y = (e.clientY / window.innerHeight - 0.5);
 
-  targetX = x * 18;
-  targetY = y * 12;
+  /* 🔥 УСИЛИЛИ РЕАКЦИЮ */
+  targetX = x * 40;
+  targetY = y * 28;
 });
 
 function animate() {
-  currentX += (targetX - currentX) * 0.06;
-  currentY += (targetY - currentY) * 0.06;
+  /* быстрее реакция = заметнее “среда” */
+  currentX += (targetX - currentX) * 0.09;
+  currentY += (targetY - currentY) * 0.09;
 
-  back.style.transform = `translate(${currentX * -0.4}px, ${currentY * -0.4}px)`;
-  front.style.transform = `translate(${currentX}px, ${currentY}px)`;
+  /* глубина слоёв */
+  back.style.transform =
+    `translate(${currentX * -0.35}px, ${currentY * -0.35}px)`;
+
+  front.style.transform =
+    `translate(${currentX}px, ${currentY}px)`;
 
   requestAnimationFrame(animate);
 }
