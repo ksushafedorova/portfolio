@@ -5,18 +5,6 @@
 <title>Ksenia Fedorova</title>
 
 <style>
-@keyframes driftBack {
-  0%   { transform: translate(0px, 0px); }
-  50%  { transform: translate(-10px, 6px); }
-  100% { transform: translate(0px, 0px); }
-}
-
-@keyframes driftFront {
-  0%   { transform: translate(0px, 0px); }
-  50%  { transform: translate(12px, -6px); }
-  100% { transform: translate(0px, 0px); }
-}
-
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -30,27 +18,9 @@ a {
   text-decoration: none;
 }
 
-/* 🌫️ CLOUD LAYERS */
+/* 🌫️ CLOUD LAYERS (БЕЗ АНИМАЦИИ) */
 
-.back-layer {
-  position: fixed;
-  top: -40px;
-  left: -40px;
-  width: calc(100% + 80px);
-  height: calc(100% + 80px);
-
-  background: url('clouds.jpg') center/cover no-repeat;
-
-  opacity: 0.42;
-  filter: contrast(1.4) brightness(1.12);
-
-  animation: driftBack 240s ease-in-out infinite;
-
-  z-index: -2;
-
-  will-change: transform;
-}
-
+.back-layer,
 .front-layer {
   position: fixed;
   top: -40px;
@@ -60,17 +30,24 @@ a {
 
   background: url('clouds.jpg') center/cover no-repeat;
 
-  opacity: 0.25;
-  filter: contrast(1.55) brightness(1.15);
-
-  animation: driftFront 180s ease-in-out infinite;
-
-  z-index: -1;
-
   will-change: transform;
 }
 
-/* OVERLAY */
+/* back — глубина */
+.back-layer {
+  opacity: 0.45;
+  filter: contrast(1.5) brightness(1.15);
+  z-index: -2;
+}
+
+/* front — ближе */
+.front-layer {
+  opacity: 0.25;
+  filter: contrast(1.6) brightness(1.2);
+  z-index: -1;
+}
+
+/* overlay */
 
 .overlay {
   position: fixed;
@@ -123,7 +100,6 @@ h1 {
   transform: translateY(4px);
 
   transition: opacity 0.3s ease, transform 0.3s ease;
-
   margin-bottom: 20px;
 }
 
@@ -205,7 +181,7 @@ function toggleMenu() {
   document.getElementById('stay').classList.toggle('active');
 }
 
-/* 🌫️ STRONG REACTIVE FIELD */
+/* 🌫️ ONLY REACTIVE FIELD */
 
 const back = document.getElementById('back');
 const front = document.getElementById('front');
@@ -216,20 +192,21 @@ let currentX = 0;
 let currentY = 0;
 
 document.addEventListener('mousemove', (e) => {
+
   const x = (e.clientX / window.innerWidth - 0.5);
   const y = (e.clientY / window.innerHeight - 0.5);
 
-  /* 🔥 УСИЛИЛИ РЕАКЦИЮ */
-  targetX = x * 40;
-  targetY = y * 28;
+  /* реакция чуть сильнее, чтобы стало ВИДНО */
+  targetX = x * 60;
+  targetY = y * 40;
 });
 
 function animate() {
-  /* быстрее реакция = заметнее “среда” */
-  currentX += (targetX - currentX) * 0.09;
-  currentY += (targetY - currentY) * 0.09;
+  /* инерция */
+  currentX += (targetX - currentX) * 0.1;
+  currentY += (targetY - currentY) * 0.1;
 
-  /* глубина слоёв */
+  /* разные глубины */
   back.style.transform =
     `translate(${currentX * -0.35}px, ${currentY * -0.35}px)`;
 
