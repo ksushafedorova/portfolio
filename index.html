@@ -23,6 +23,8 @@ body {
   color: #f2f2f2;
   background: #000;
   overflow-x: hidden;
+  overflow-y: auto;
+  cursor: default;
 }
 
 a {
@@ -34,29 +36,79 @@ a {
 
 .back-layer {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -20px;
+  left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+
   background: url('clouds.jpg') center/cover no-repeat;
+
   opacity: 0.45;
   filter: contrast(1.5) brightness(1.15);
+
   animation: driftBack 140s ease-in-out infinite;
-  z-index: -2;
+
+  z-index: -3;
+
+  transition:
+    transform 1.8s ease-out,
+    filter 1.8s ease-out;
 }
 
 .front-layer {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -20px;
+  left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+
   background: url('clouds.jpg') center/cover no-repeat;
+
   opacity: 0.25;
   filter: contrast(1.6) brightness(1.2);
+
   animation: driftFront 100s ease-in-out infinite;
+
+  z-index: -2;
+
+  transition:
+    transform 1.4s ease-out,
+    opacity 1.4s ease-out;
+}
+
+/* subtle ripple light */
+
+.ripple {
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,0.08) 0%,
+      rgba(255,255,255,0.03) 35%,
+      rgba(255,255,255,0) 72%
+    );
+
+  mix-blend-mode: screen;
+
+  opacity: 0;
+
+  transform:
+    translate(-50%, -50%)
+    scale(0.7);
+
+  transition:
+    opacity 1.2s ease,
+    transform 1.6s ease;
+
   z-index: -1;
 }
+
+/* overlay */
 
 .overlay {
   position: fixed;
@@ -72,7 +124,7 @@ a {
 
 main {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 800px;
   margin: 0 auto;
   padding: 110px 40px;
@@ -99,19 +151,25 @@ h1 {
   margin-bottom: 70px;
 }
 
-/* 🫧 STAY SOUND (УЛУЧШЕННЫЙ, ЖИВОЙ, НО НЕ ЛОМАЕТ СТИЛЬ) */
+/* STAY SOUND */
 
 .stay-sound {
   display: inline-block;
   cursor: pointer;
+
   font-size: 13px;
   letter-spacing: 3px;
+
   color: #d8d8d8;
 
   opacity: 0.65;
+
   transform: translateY(4px);
 
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+
   margin-bottom: 20px;
 }
 
@@ -129,9 +187,12 @@ h1 {
 
 .dropdown {
   margin-top: 20px;
+
   opacity: 0;
   max-height: 0;
+
   overflow: hidden;
+
   transition:
     opacity 0.8s ease,
     max-height 1s ease;
@@ -144,10 +205,14 @@ h1 {
 
 .dropdown a {
   display: block;
+
   margin: 14px 0;
+
   font-size: 15px;
   letter-spacing: 2px;
+
   opacity: 0.82;
+
   transition: opacity 0.3s ease;
 }
 
@@ -159,13 +224,12 @@ h1 {
 
 <body>
 
-<!-- CLOUD LAYERS -->
+<div class="back-layer" id="back"></div>
+<div class="front-layer" id="front"></div>
 
-<div class="back-layer"></div>
-<div class="front-layer"></div>
+<div class="ripple" id="ripple"></div>
+
 <div class="overlay"></div>
-
-<!-- INDEX -->
 
 <main>
 
@@ -180,20 +244,27 @@ h1 {
     My practice combines voice, piano, electronics and field recordings.
   </div>
 
-  <!-- STAY SOUND -->
-
   <div class="stay-sound" id="stay" onclick="toggleMenu()">
     STAY SOUND +
   </div>
 
-  <!-- TRACE ZONES -->
-
   <div class="dropdown" id="dropdown">
 
-    <a href="theatre.html">THEATRE TRACE</a>
-    <a href="film.html">FILM TRACE</a>
-    <a href="sound.html">SOUND TRACE</a>
-    <a href="fragments.html">FRAGMENTS</a>
+    <a href="theatre.html">
+      THEATRE TRACE
+    </a>
+
+    <a href="film.html">
+      FILM TRACE
+    </a>
+
+    <a href="sound.html">
+      SOUND TRACE
+    </a>
+
+    <a href="fragments.html">
+      FRAGMENTS
+    </a>
 
   </div>
 
@@ -201,9 +272,61 @@ h1 {
 
 <script>
 function toggleMenu() {
-  document.getElementById('dropdown').classList.toggle('open');
-  document.getElementById('stay').classList.toggle('active');
+  document
+    .getElementById('dropdown')
+    .classList
+    .toggle('open');
+
+  document
+    .getElementById('stay')
+    .classList
+    .toggle('active');
 }
+
+/* subtle living surface */
+
+const ripple = document.getElementById('ripple');
+const front = document.getElementById('front');
+const back = document.getElementById('back');
+
+let timeout;
+
+document.addEventListener('mousemove', (e) => {
+
+  const x = e.clientX;
+  const y = e.clientY;
+
+  ripple.style.left = x + 'px';
+  ripple.style.top = y + 'px';
+
+  ripple.style.opacity = '1';
+  ripple.style.transform =
+    'translate(-50%, -50%) scale(1)';
+
+  const moveX = (x / window.innerWidth - 0.5) * 8;
+  const moveY = (y / window.innerHeight - 0.5) * 6;
+
+  front.style.transform =
+    `translate(${moveX}px, ${moveY}px)`;
+
+  back.style.transform =
+    `translate(${moveX * -0.4}px, ${moveY * -0.4}px)`;
+
+  clearTimeout(timeout);
+
+  timeout = setTimeout(() => {
+
+    ripple.style.opacity = '0';
+
+    ripple.style.transform =
+      'translate(-50%, -50%) scale(0.7)';
+
+    front.style.transform = '';
+    back.style.transform = '';
+
+  }, 120);
+
+});
 </script>
 
 </body>
