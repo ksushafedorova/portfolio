@@ -150,9 +150,8 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + memory */
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
-const prevMouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
@@ -161,12 +160,15 @@ window.addEventListener('mousemove', (e) => {
 
 const geometry = new THREE.PlaneGeometry(2, 2);
 
+/* memory texture (feedback) */
+const rt = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
     uTexture: { value: texture },
+    uPrevFrame: { value: null },
     uMouse: { value: mouse },
-    uPrevMouse: { value: prevMouse },
     uTime: { value: 0 }
   },
 
@@ -180,8 +182,8 @@ const material = new THREE.ShaderMaterial({
 
   fragmentShader: `
     uniform sampler2D uTexture;
+    uniform sampler2D uPrevFrame;
     uniform vec2 uMouse;
-    uniform vec2 uPrevMouse;
     uniform float uTime;
 
     varying vec2 vUv;
@@ -190,35 +192,37 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      /* segment of motion (cursor trail) */
+      /* previous accumulated field */
+      vec4 prev = texture2D(uPrevFrame, uv);
+
       float d = distance(uv, uMouse);
-      float dp = distance(uv, uPrevMouse);
 
-      /* finer ripple */
-      float wave = sin(d * 55.0 - uTime * 10.0);
-      float wave2 = sin(dp * 60.0 - uTime * 8.0);
+      /* new ripple impulse */
+      float wave = sin(d * 70.0 - uTime * 10.0);
+      float falloff = exp(-d * 14.0);
 
-      float falloff = exp(-d * 12.0);
-      float falloff2 = exp(-dp * 10.0);
+      float newRipple = wave * falloff * 0.02;
 
-      float ripple = wave * falloff + wave2 * falloff2;
+      /* accumulate memory */
+      float memory = prev.r + newRipple;
 
-      /* subtle base motion */
-      float n1 = sin(uTime * 0.2 + uv.y * 10.0);
-      float n2 = cos(uTime * 0.18 + uv.x * 10.0);
+      /* decay */
+      memory *= 0.985;
 
-      uv += vec2(n1, n2) * 0.002;
-      uv += ripple * 0.004;
+      /* apply distortion */
+      vec2 offset = vec2(memory * 0.003, memory * 0.002);
 
-      vec4 color = texture2D(uTexture, uv);
+      vec4 color = texture2D(uTexture, uv + offset);
 
+      /* balanced exposure */
       float exposure = 1.10;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
       color.rgb = c;
 
-      gl_FragColor = color;
+      /* store memory in red channel */
+      gl_FragColor = vec4(memory, 0.0, 0.0, 1.0);
     }
   `
 });
@@ -226,13 +230,26 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* smooth memory of mouse */
-function animate(time) {
-  material.uniforms.uTime.value = time * 0.001;
+/* simple feedback loop */
+let readBuffer = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+let writeBuffer = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
 
-  prevMouse.lerp(mouse, 0.08);
+function animate(time) {
+
+  material.uniforms.uTime.value = time * 0.001;
+  material.uniforms.uPrevFrame.value = readBuffer.texture;
+
+  renderer.setRenderTarget(writeBuffer);
+  renderer.render(scene, camera);
+  renderer.setRenderTarget(null);
+
+  /* swap buffers */
+  let temp = readBuffer;
+  readBuffer = writeBuffer;
+  writeBuffer = temp;
 
   renderer.render(scene, camera);
+
   requestAnimationFrame(animate);
 }
 
