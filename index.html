@@ -190,27 +190,20 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      float d  = distance(uv, uMouse);
+      /* segment of motion (cursor trail) */
+      float d = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
 
-      /* stable ripple */
-      float wave  = sin(d * 55.0 - uTime * 10.0);
+      /* finer ripple */
+      float wave = sin(d * 55.0 - uTime * 10.0);
       float wave2 = sin(dp * 60.0 - uTime * 8.0);
 
-      float falloff  = exp(-d * 12.0);
+      float falloff = exp(-d * 12.0);
       float falloff2 = exp(-dp * 10.0);
 
       float ripple = wave * falloff + wave2 * falloff2;
 
-      /* 🌫️ soft memory (no jelly) */
-      float speedHint = length(uMouse - uPrevMouse);
-
-      float memory = exp(-d * 22.0) * speedHint * 0.25;
-      memory = clamp(memory, 0.0, 0.25);
-
-      ripple += memory * 0.35;
-
-      /* base motion */
+      /* subtle base motion */
       float n1 = sin(uTime * 0.2 + uv.y * 10.0);
       float n2 = cos(uTime * 0.18 + uv.x * 10.0);
 
@@ -233,7 +226,7 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* loop */
+/* smooth memory of mouse */
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
 
