@@ -13,6 +13,7 @@ html, body {
   font-family: Arial, sans-serif;
   color: #f2f2f2;
 }
+
 canvas { display:block; }
 
 .overlay {
@@ -34,30 +35,37 @@ main {
   pointer-events: none;
 }
 
-h1 { font-size: 38px; font-weight: normal; margin-bottom: 12px; }
-.subtitle { font-size: 16px; color: #d9d9d9; margin-bottom: 34px; }
-.description { max-width: 650px; margin: 0 auto; line-height: 1.7; font-size: 15px; color: #cfcfcf; margin-bottom: 60px; }
+h1 { font-size:38px; font-weight:normal; margin-bottom:12px; }
+.subtitle { font-size:16px; color:#d9d9d9; margin-bottom:34px; }
+.description {
+  max-width:650px;
+  margin:0 auto;
+  line-height:1.7;
+  font-size:15px;
+  color:#cfcfcf;
+  margin-bottom:60px;
+}
 
-.menu { pointer-events: auto; }
+.menu { pointer-events:auto; }
 
 .stay {
-  display: inline-block;
-  cursor: pointer;
-  font-size: 13px;
-  letter-spacing: 3px;
-  opacity: 0.75;
-  transition: 0.3s;
+  display:inline-block;
+  cursor:pointer;
+  font-size:13px;
+  letter-spacing:3px;
+  opacity:0.75;
+  transition:0.3s;
 }
-.stay:hover { opacity: 1; transform: translateY(-2px); }
+.stay:hover { opacity:1; transform:translateY(-2px); }
 
 .dropdown {
-  margin-top: 24px;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: 0.7s ease;
+  margin-top:24px;
+  opacity:0;
+  max-height:0;
+  overflow:hidden;
+  transition:0.7s ease;
 }
-.dropdown.open { opacity: 1; max-height: 400px; }
+.dropdown.open { opacity:1; max-height:400px; }
 
 .dropdown a {
   display:block;
@@ -112,11 +120,20 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
+/* mouse + velocity */
 const mouse = new THREE.Vector2(0.5,0.5);
+const prevMouse = new THREE.Vector2(0.5,0.5);
+const velocity = new THREE.Vector2();
 
 window.addEventListener('mousemove', (e)=>{
-  mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - e.clientY / window.innerHeight;
+  const x = e.clientX / window.innerWidth;
+  const y = 1.0 - e.clientY / window.innerHeight;
+
+  velocity.x = x - mouse.x;
+  velocity.y = y - mouse.y;
+
+  prevMouse.copy(mouse);
+  mouse.set(x,y);
 });
 
 const geometry = new THREE.PlaneGeometry(2,2);
@@ -126,6 +143,8 @@ const material = new THREE.ShaderMaterial({
   uniforms:{
     uTexture:{ value:texture },
     uMouse:{ value:mouse },
+    uPrevMouse:{ value:prevMouse },
+    uVelocity:{ value:velocity },
     uTime:{ value:0 }
   },
 
@@ -140,38 +159,41 @@ const material = new THREE.ShaderMaterial({
   fragmentShader:`
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
+    uniform vec2 uPrevMouse;
+    uniform vec2 uVelocity;
     uniform float uTime;
 
     varying vec2 vUv;
-
-    float hash(vec2 p){
-      return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453);
-    }
 
     void main(){
 
       vec2 uv = vUv;
 
       float d = distance(uv, uMouse);
+      float dp = distance(uv, uPrevMouse);
 
-      /* 🌊 multi-layer ripple memory (fake accumulation) */
-      float wave1 = sin(d * 60.0 - uTime * 6.0);
-      float wave2 = sin(d * 40.0 - uTime * 3.5);
-      float wave3 = sin(d * 25.0 - uTime * 2.0);
+      /* 🌊 base ripple (твоя хорошая версия) */
+      float wave = sin(d * 65.0 - uTime * 6.0);
+      float falloff = exp(-d * 12.0);
 
-      float falloff = exp(-d * 10.0);
+      float ripple = wave * falloff;
 
-      float ripple = (wave1 + wave2 * 0.7 + wave3 * 0.5) * falloff;
+      /* 🌫️ soft memory (НО НЕ ШУМ) */
+      float speed = length(uVelocity);
 
-      /* slight chaotic persistence */
-      float noise = hash(floor(uv * 200.0)) * 0.002;
+      float echo = exp(-d * 20.0) * speed * 0.03;
+      float echo2 = exp(-dp * 22.0) * speed * 0.02;
 
-      uv += ripple * 0.006 + noise;
+      /* combine gently */
+      ripple += (echo + echo2);
+
+      /* final subtle distortion */
+      uv += ripple * 0.005;
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* balanced mid tone (your stable version) */
-      float exposure = 1.08;
+      /* your stable contrast zone */
+      float exposure = 1.07;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
