@@ -152,7 +152,7 @@ document.body.appendChild(renderer.domElement);
 /* TEXTURE */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 
-/* IMPORTANT: correct color space */
+/* correct color handling */
 texture.colorSpace = THREE.SRGBColorSpace;
 
 /* MOUSE */
@@ -204,16 +204,13 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* 🌫️ softer depth (reduced contrast feeling) */
-      float depth = smoothstep(0.15, 0.95, dist);
+      /* 🌫️ neutral midtone balance (final correction) */
+      vec3 c = color.rgb;
 
-      float lightAmt = 1.01;
-      float darkAmt  = 0.99;
+      c = (c - 0.5) * 1.04 + 0.5; // very light contrast balance
+      c += 0.01;                  // tiny lift (removes heaviness)
 
-      vec3 lightLayer = color.rgb * lightAmt;
-      vec3 darkLayer  = color.rgb * darkAmt;
-
-      color.rgb = mix(lightLayer, darkLayer, depth * 0.75);
+      color.rgb = c;
 
       gl_FragColor = color;
     }
