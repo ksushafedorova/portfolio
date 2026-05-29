@@ -23,27 +23,23 @@ canvas {
   inset: 0;
   background: rgba(0,0,0,0.22);
   pointer-events: none;
+  z-index: 2;
 }
 
 main {
   position: absolute;
   z-index: 10;
-
   width: 100%;
   top: 50%;
   left: 50%;
-
   transform: translate(-50%, -50%);
-
   text-align: center;
-
   pointer-events: none;
 }
 
 h1 {
   font-size: 38px;
   font-weight: normal;
-  letter-spacing: 1px;
   margin-bottom: 12px;
 }
 
@@ -68,17 +64,11 @@ h1 {
 
 .stay {
   display: inline-block;
-
   cursor: pointer;
-
   font-size: 13px;
   letter-spacing: 3px;
-
   opacity: 0.72;
-
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+  transition: 0.3s;
 }
 
 .stay:hover {
@@ -88,15 +78,10 @@ h1 {
 
 .dropdown {
   margin-top: 24px;
-
   opacity: 0;
   max-height: 0;
-
   overflow: hidden;
-
-  transition:
-    opacity 0.7s ease,
-    max-height 0.9s ease;
+  transition: 0.7s ease;
 }
 
 .dropdown.open {
@@ -106,18 +91,12 @@ h1 {
 
 .dropdown a {
   display: block;
-
   margin: 14px 0;
-
   color: #f2f2f2;
   text-decoration: none;
-
   font-size: 15px;
   letter-spacing: 2px;
-
   opacity: 0.82;
-
-  transition: opacity 0.3s ease;
 }
 
 .dropdown a:hover {
@@ -131,7 +110,6 @@ h1 {
 <div class="overlay"></div>
 
 <main>
-
   <h1>Ksenia Fedorova</h1>
 
   <div class="subtitle">
@@ -144,7 +122,6 @@ h1 {
   </div>
 
   <div class="menu">
-
     <div class="stay" onclick="toggleMenu()">
       STAY SOUND +
     </div>
@@ -155,9 +132,7 @@ h1 {
       <a href="sound.html">SOUND TRACE</a>
       <a href="fragments.html">FRAGMENTS</a>
     </div>
-
   </div>
-
 </main>
 
 <script type="module">
@@ -166,71 +141,42 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.mod
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.OrthographicCamera(
-  -1, 1, 1, -1, 0.1, 10
-);
-
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
-
-renderer.setSize(
-  window.innerWidth,
-  window.innerHeight
-);
-
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-/* 🌫️ CLOUD TEXTURE */
-
+/* TEXTURE */
 const textureLoader = new THREE.TextureLoader();
-
 const texture = textureLoader.load('clouds.jpg');
 
-texture.minFilter = THREE.LinearFilter;
-
-/* 🫧 MOUSE */
-
+/* MOUSE */
 const mouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
-
   mouse.x = e.clientX / window.innerWidth;
   mouse.y = 1.0 - (e.clientY / window.innerHeight);
-
 });
 
-/* 🌊 SHADER */
-
+/* SHADER */
 const material = new THREE.ShaderMaterial({
-
   uniforms: {
-
     uTexture: { value: texture },
-
     uMouse: { value: mouse },
-
     uTime: { value: 0 }
-
   },
 
   vertexShader: `
     varying vec2 vUv;
-
     void main() {
       vUv = uv;
-
-      gl_Position =
-        projectionMatrix *
-        modelViewMatrix *
-        vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `,
 
   fragmentShader: `
-
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
     uniform float uTime;
@@ -241,83 +187,44 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      /* 🌫️ DISTANCE FROM CURSOR */
+      float dist = distance(uv, uMouse);
 
-      float dist =
-        distance(uv, uMouse);
+      float field = exp(-dist * 10.0);
 
-      /* 🌊 SOFT FIELD */
+      // 🌫️ very subtle motion (NO stretching)
+      float noiseX = sin(uTime * 0.3 + uv.y * 20.0) * 0.003;
+      float noiseY = cos(uTime * 0.25 + uv.x * 18.0) * 0.003;
 
-      float wave =
-        exp(-dist * 8.0);
+      uv += vec2(noiseX, noiseY) * field;
 
-      /* 🫧 ORGANIC DISTORTION */
-
-      uv.x +=
-        sin(uv.y * 14.0 + uTime * 0.4)
-        * wave
-        * 0.018;
-
-      uv.y +=
-        cos(uv.x * 10.0 + uTime * 0.3)
-        * wave
-        * 0.012;
-
-      /* 🌫️ VERY SOFT GLOBAL MOVEMENT */
-
-      uv.x += sin(uTime * 0.03) * 0.003;
-      uv.y += cos(uTime * 0.025) * 0.003;
-
-      vec4 color =
-        texture2D(uTexture, uv);
-
-      gl_FragColor = color;
+      gl_FragColor = texture2D(uTexture, uv);
     }
-
   `
 });
 
-const geometry =
-  new THREE.PlaneGeometry(2, 2);
-
-const plane =
-  new THREE.Mesh(geometry, material);
-
+const geometry = new THREE.PlaneGeometry(2, 2);
+const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* RENDER LOOP */
-
+/* LOOP */
 function animate(time) {
-
-  material.uniforms.uTime.value =
-    time * 0.001;
-
+  material.uniforms.uTime.value = time * 0.001;
   renderer.render(scene, camera);
-
   requestAnimationFrame(animate);
 }
 
 animate();
 
 /* RESIZE */
-
 window.addEventListener('resize', () => {
-
-  renderer.setSize(
-    window.innerWidth,
-    window.innerHeight
-  );
-
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
 </script>
 
 <script>
 function toggleMenu() {
-  document
-    .getElementById('dropdown')
-    .classList
-    .toggle('open');
+  document.getElementById('dropdown').classList.toggle('open');
 }
 </script>
 
