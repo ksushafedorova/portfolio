@@ -14,17 +14,7 @@ html, body {
   color: #f2f2f2;
 }
 
-canvas {
-  display: block;
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-  pointer-events: none;
-  z-index: 2;
-}
+canvas { display: block; }
 
 main {
   position: absolute;
@@ -37,18 +27,8 @@ main {
   pointer-events: none;
 }
 
-h1 {
-  font-size: 38px;
-  font-weight: normal;
-  margin-bottom: 12px;
-}
-
-.subtitle {
-  font-size: 16px;
-  color: #d9d9d9;
-  margin-bottom: 34px;
-}
-
+h1 { font-size: 38px; font-weight: normal; margin-bottom: 12px; }
+.subtitle { font-size: 16px; color: #d9d9d9; margin-bottom: 34px; }
 .description {
   max-width: 650px;
   margin: 0 auto;
@@ -57,80 +37,15 @@ h1 {
   color: #cfcfcf;
   margin-bottom: 60px;
 }
-
-.menu {
-  pointer-events: auto;
-}
-
-.stay {
-  display: inline-block;
-  cursor: pointer;
-  font-size: 13px;
-  letter-spacing: 3px;
-  opacity: 0.75;
-  transition: 0.3s;
-}
-
-.stay:hover {
-  opacity: 1;
-  transform: translateY(-2px);
-}
-
-.dropdown {
-  margin-top: 24px;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: 0.7s ease;
-}
-
-.dropdown.open {
-  opacity: 1;
-  max-height: 400px;
-}
-
-.dropdown a {
-  display: block;
-  margin: 14px 0;
-  color: #f2f2f2;
-  text-decoration: none;
-  font-size: 15px;
-  letter-spacing: 2px;
-  opacity: 0.82;
-}
-
-.dropdown a:hover {
-  opacity: 1;
-}
 </style>
 </head>
 
 <body>
 
-<div class="overlay"></div>
-
 <main>
   <h1>Ksenia Fedorova</h1>
-
-  <div class="subtitle">
-    composer / sound artist / theatre & film music
-  </div>
-
-  <div class="description">
-    I work with theatre, film, animation and experimental sound.
-    My practice combines voice, piano, electronics and field recordings.
-  </div>
-
-  <div class="menu">
-    <div class="stay" onclick="toggleMenu()">STAY SOUND +</div>
-
-    <div class="dropdown" id="dropdown">
-      <a href="theatre.html">THEATRE TRACE</a>
-      <a href="film.html">FILM TRACE</a>
-      <a href="sound.html">SOUND TRACE</a>
-      <a href="fragments.html">FRAGMENTS</a>
-    </div>
-  </div>
+  <div class="subtitle">composer / sound artist</div>
+  <div class="description">interactive surface test</div>
 </main>
 
 <script type="module">
@@ -138,51 +53,64 @@ h1 {
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
-
-const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + memory */
-const mouse = new THREE.Vector2(0.5, 0.5);
-const prevMouse = new THREE.Vector2(0.5, 0.5);
+/* ---------------- TRAIL SYSTEM ---------------- */
+
+const TRAIL_SIZE = 12;
+const trail = [];
+
+for (let i = 0; i < TRAIL_SIZE; i++) {
+  trail.push(new THREE.Vector2(0.5, 0.5));
+}
 
 window.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - e.clientY / window.innerHeight;
+  const x = e.clientX / window.innerWidth;
+  const y = 1.0 - e.clientY / window.innerHeight;
+
+  trail.unshift(new THREE.Vector2(x, y));
+  trail.pop();
 });
 
-const geometry = new THREE.PlaneGeometry(2, 2);
+/* flatten trail for shader */
+function getTrailArray() {
+  const arr = [];
+  for (let i = 0; i < TRAIL_SIZE; i++) {
+    arr.push(trail[i].x, trail[i].y);
+  }
+  return new Float32Array(arr);
+}
+
+/* ---------------- SHADER ---------------- */
 
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
     uTexture: { value: texture },
-    uMouse: { value: mouse },
-    uPrevMouse: { value: prevMouse },
-    uTime: { value: 0 }
+    uTime: { value: 0 },
+    uTrail: { value: getTrailArray() }
   },
 
   vertexShader: `
     varying vec2 vUv;
     void main() {
       vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
   `,
 
   fragmentShader: `
     uniform sampler2D uTexture;
-    uniform vec2 uMouse;
-    uniform vec2 uPrevMouse;
     uniform float uTime;
+    uniform float uTrail[24];
 
     varying vec2 vUv;
 
@@ -190,63 +118,52 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      /* segment of motion (cursor trail) */
-      float d = distance(uv, uMouse);
-      float dp = distance(uv, uPrevMouse);
+      float ripple = 0.0;
 
-      /* finer ripple */
-      float wave = sin(d * 55.0 - uTime * 10.0);
-      float wave2 = sin(dp * 60.0 - uTime * 8.0);
+      /* --- TRAIL INFLUENCE --- */
+      for (int i = 0; i < 12; i++) {
 
-      float falloff = exp(-d * 12.0);
-      float falloff2 = exp(-dp * 10.0);
+        vec2 p = vec2(uTrail[i*2], uTrail[i*2+1]);
 
-      float ripple = wave * falloff + wave2 * falloff2;
+        float d = distance(uv, p);
 
-      /* subtle base motion */
-      float n1 = sin(uTime * 0.2 + uv.y * 10.0);
-      float n2 = cos(uTime * 0.18 + uv.x * 10.0);
+        float strength = exp(-d * 18.0) * (1.0 - float(i) * 0.08);
 
-      uv += vec2(n1, n2) * 0.002;
-      uv += ripple * 0.004;
+        ripple += sin(d * 50.0 - uTime * 8.0) * strength;
+      }
+
+      uv += ripple * 0.003;
 
       vec4 color = texture2D(uTexture, uv);
 
-      float exposure = 1.10;
+      float exposure = 1.08;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      color.rgb = c;
-
-      gl_FragColor = color;
+      gl_FragColor = vec4(c,1.0);
     }
   `
 });
 
-const plane = new THREE.Mesh(geometry, material);
-scene.add(plane);
+const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2), material);
+scene.add(mesh);
 
-/* smooth memory of mouse */
-function animate(time) {
-  material.uniforms.uTime.value = time * 0.001;
+/* ---------------- LOOP ---------------- */
 
-  prevMouse.lerp(mouse, 0.08);
+function animate(t){
+  material.uniforms.uTime.value = t * 0.001;
+  material.uniforms.uTrail.value = getTrailArray();
 
-  renderer.render(scene, camera);
+  renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
 
 animate();
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize',()=>{
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-</script>
 
-<script>
-function toggleMenu() {
-  document.getElementById('dropdown').classList.toggle('open');
-}
 </script>
 
 </body>
