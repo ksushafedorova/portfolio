@@ -7,76 +7,31 @@
 <style>
 html, body {
   margin: 0;
-  padding: 0;
   overflow: hidden;
   background: #000;
-  font-family: Arial, sans-serif;
-  color: #f2f2f2;
+  font-family: Arial;
+  color: #fff;
 }
-
 canvas { display:block; }
 
 .overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-  pointer-events: none;
-  z-index: 2;
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.25);
+  pointer-events:none;
 }
 
-main {
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  pointer-events: none;
+main{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:10;
+  pointer-events:none;
 }
-
-h1 { font-size:38px; font-weight:normal; margin-bottom:12px; }
-.subtitle { font-size:16px; color:#d9d9d9; margin-bottom:34px; }
-.description {
-  max-width:650px;
-  margin:0 auto;
-  line-height:1.7;
-  font-size:15px;
-  color:#cfcfcf;
-  margin-bottom:60px;
-}
-
-.menu { pointer-events:auto; }
-
-.stay {
-  display:inline-block;
-  cursor:pointer;
-  font-size:13px;
-  letter-spacing:3px;
-  opacity:0.75;
-  transition:0.3s;
-}
-.stay:hover { opacity:1; transform:translateY(-2px); }
-
-.dropdown {
-  margin-top:24px;
-  opacity:0;
-  max-height:0;
-  overflow:hidden;
-  transition:0.7s ease;
-}
-.dropdown.open { opacity:1; max-height:400px; }
-
-.dropdown a {
-  display:block;
-  margin:14px 0;
-  color:#f2f2f2;
-  text-decoration:none;
-  font-size:15px;
-  letter-spacing:2px;
-  opacity:0.82;
-}
-.dropdown a:hover { opacity:1; }
+h1{font-size:38px;font-weight:normal;}
+.subtitle{opacity:0.8;margin-bottom:30px;}
 </style>
 </head>
 
@@ -86,88 +41,66 @@ h1 { font-size:38px; font-weight:normal; margin-bottom:12px; }
 
 <main>
   <h1>Ksenia Fedorova</h1>
-  <div class="subtitle">composer / sound artist / theatre & film music</div>
-  <div class="description">
-    I work with theatre, film, animation and experimental sound.
-    My practice combines voice, piano, electronics and field recordings.
-  </div>
-
-  <div class="menu">
-    <div class="stay" onclick="toggleMenu()">STAY SOUND +</div>
-    <div class="dropdown" id="dropdown">
-      <a href="theatre.html">THEATRE TRACE</a>
-      <a href="film.html">FILM TRACE</a>
-      <a href="sound.html">SOUND TRACE</a>
-      <a href="fragments.html">FRAGMENTS</a>
-    </div>
-  </div>
+  <div class="subtitle">composer / sound / film / theatre</div>
 </main>
 
 <script type="module">
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
-const scene = new THREE.Scene();
-const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
-camera.position.z = 1;
-
 const renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const texture = new THREE.TextureLoader().load('clouds.jpg');
-texture.colorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,0.1,10);
+camera.position.z = 1;
 
-/* mouse */
+const tex = new THREE.TextureLoader().load('clouds.jpg');
+tex.colorSpace = THREE.SRGBColorSpace;
+
 const mouse = new THREE.Vector2(0.5,0.5);
-const prevMouse = new THREE.Vector2(0.5,0.5);
 let velocity = new THREE.Vector2();
 
-window.addEventListener('mousemove', (e)=>{
-  const x = e.clientX / window.innerWidth;
-  const y = 1.0 - e.clientY / window.innerHeight;
+window.addEventListener('mousemove',(e)=>{
+  const nx = e.clientX/innerWidth;
+  const ny = 1.0 - e.clientY/innerHeight;
 
-  velocity.x = x - mouse.x;
-  velocity.y = y - mouse.y;
+  velocity.x = nx - mouse.x;
+  velocity.y = ny - mouse.y;
 
-  prevMouse.copy(mouse);
-  mouse.set(x,y);
+  mouse.set(nx,ny);
 });
 
-const geometry = new THREE.PlaneGeometry(2,2);
+/* ---------- MEMORY BUFFER ---------- */
 
-/* --- FEEDBACK BUFFERS --- */
-const rt1 = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
-const rt2 = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+const rtA = new THREE.WebGLRenderTarget(innerWidth,innerHeight);
+const rtB = new THREE.WebGLRenderTarget(innerWidth,innerHeight);
 
-let readBuffer = rt1;
-let writeBuffer = rt2;
+let read = rtA;
+let write = rtB;
 
-const material = new THREE.ShaderMaterial({
+/* ---------- COMPUTE MATERIAL ---------- */
 
+const computeMat = new THREE.ShaderMaterial({
   uniforms:{
-    uTexture:{ value:texture },
-    uPrevFrame:{ value:null },
+    uPrev:{ value:null },
     uMouse:{ value:mouse },
-    uVelocity:{ value:velocity },
-    uTime:{ value:0 }
+    uVel:{ value:velocity }
   },
 
   vertexShader:`
     varying vec2 vUv;
     void main(){
       vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      gl_Position = vec4(position,1.0);
     }
   `,
 
   fragmentShader:`
-    uniform sampler2D uTexture;
-    uniform sampler2D uPrevFrame;
+    uniform sampler2D uPrev;
     uniform vec2 uMouse;
-    uniform vec2 uVelocity;
-    uniform float uTime;
+    uniform vec2 uVel;
 
     varying vec2 vUv;
 
@@ -175,72 +108,99 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      /* previous memory */
-      vec4 prev = texture2D(uPrevFrame, uv);
+      float prev = texture2D(uPrev, uv).r;
 
       float d = distance(uv, uMouse);
+      float speed = length(uVel);
 
-      /* new imprint */
-      float speed = length(uVelocity);
+      float add = exp(-d*20.0) * speed * 0.1;
 
-      float newImpact = exp(-d * 18.0) * speed * 0.08;
+      float memory = prev * 0.94 + add;
 
-      /* accumulate memory */
-      float memory = prev.r * 0.96 + newImpact;
-
-      /* soft distortion */
-      uv += memory * 0.01;
-
-      vec4 color = texture2D(uTexture, uv);
-
-      /* stable contrast (your preferred zone) */
-      float exposure = 1.06;
-      vec3 c = color.rgb * exposure;
-      c = c / (c + vec3(0.42));
-
-      color.rgb = c;
-
-      gl_FragColor = vec4(memory, memory*0.5, 0.0, 1.0);
+      gl_FragColor = vec4(memory,0.0,0.0,1.0);
     }
   `
 });
 
-const quad = new THREE.Mesh(geometry, material);
+const quad = new THREE.Mesh(
+  new THREE.PlaneGeometry(2,2),
+  computeMat
+);
 scene.add(quad);
 
-/* render loop */
-function animate(time){
+/* ---------- DISPLAY MATERIAL ---------- */
 
-  material.uniforms.uTime.value = time * 0.001;
+const displayMat = new THREE.ShaderMaterial({
+  uniforms:{
+    uTex:{ value:tex },
+    uMem:{ value:null }
+  },
 
-  material.uniforms.uPrevFrame.value = readBuffer.texture;
+  vertexShader:`
+    varying vec2 vUv;
+    void main(){
+      vUv = uv;
+      gl_Position = vec4(position,1.0);
+    }
+  `,
 
-  renderer.setRenderTarget(writeBuffer);
+  fragmentShader:`
+    uniform sampler2D uTex;
+    uniform sampler2D uMem;
+
+    varying vec2 vUv;
+
+    void main(){
+
+      vec2 uv = vUv;
+
+      float m = texture2D(uMem, uv).r;
+
+      uv += m * 0.01;
+
+      vec4 col = texture2D(uTex, uv);
+
+      float exposure = 1.05;
+      vec3 c = col.rgb * exposure;
+      c = c / (c + vec3(0.42));
+
+      gl_FragColor = vec4(c,1.0);
+    }
+  `
+});
+
+/* second scene for display */
+const screenScene = new THREE.Scene();
+const screenQuad = new THREE.Mesh(new THREE.PlaneGeometry(2,2), displayMat);
+screenScene.add(screenQuad);
+
+/* ---------- LOOP ---------- */
+
+function animate(){
+
+  computeMat.uniforms.uPrev.value = read.texture;
+
+  renderer.setRenderTarget(write);
   renderer.render(scene, camera);
+
+  displayMat.uniforms.uMem.value = write.texture;
+
   renderer.setRenderTarget(null);
+  renderer.render(screenScene, camera);
 
-  /* swap */
-  const tmp = readBuffer;
-  readBuffer = writeBuffer;
-  writeBuffer = tmp;
-
-  /* display */
-  renderer.render(scene, camera);
+  let tmp = read;
+  read = write;
+  write = tmp;
 
   requestAnimationFrame(animate);
 }
 
 animate();
 
-window.addEventListener('resize', ()=>{
-  renderer.setSize(window.innerWidth, window.innerHeight);
+window.addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight);
 });
-</script>
 
-<script>
-function toggleMenu(){
-  document.getElementById('dropdown').classList.toggle('open');
-}
 </script>
 
 </body>
