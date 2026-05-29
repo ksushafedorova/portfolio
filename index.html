@@ -149,11 +149,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-/* TEXTURE */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* MOUSE */
 const mouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
@@ -161,10 +159,8 @@ window.addEventListener('mousemove', (e) => {
   mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
 
-/* PLANE */
 const geometry = new THREE.PlaneGeometry(2, 2);
 
-/* SHADER */
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
@@ -188,25 +184,30 @@ const material = new THREE.ShaderMaterial({
 
     varying vec2 vUv;
 
+    float softZone(vec2 uv) {
+      return 1.0 - length(uv - vec2(0.5));
+    }
+
     void main() {
 
       vec2 uv = vUv;
 
       float dist = distance(uv, uMouse);
-      float field = exp(-dist * 6.0);
 
-      float n1 = sin(uTime * 0.35 + uv.y * 10.0);
-      float n2 = cos(uTime * 0.3 + uv.x * 10.0);
+      /* 🌫️ depth field (center alive, edges stable) */
+      float center = softZone(uv);
+      float field = exp(-dist * (4.5 + center * 3.0));
 
-      uv += vec2(n1, n2) * 0.003 * field;
+      float n1 = sin(uTime * 0.35 + uv.y * (8.0 + center * 6.0));
+      float n2 = cos(uTime * 0.3 + uv.x * (8.0 + center * 6.0));
+
+      uv += vec2(n1, n2) * 0.004 * field;
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* 🌗 balanced mid tone (final tuning) */
+      /* balanced exposure (kept from your last good version) */
       float exposure = 1.10;
-
       vec3 c = color.rgb * exposure;
-
       c = c / (c + vec3(0.42));
 
       color.rgb = c;
