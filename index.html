@@ -150,6 +150,7 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
@@ -182,38 +183,30 @@ const material = new THREE.ShaderMaterial({
 
     varying vec2 vUv;
 
-    float centerMask(vec2 uv) {
-      return 1.0 - length(uv - vec2(0.5));
-    }
-
     void main() {
 
       vec2 uv = vUv;
 
-      float dist = distance(uv, uMouse);
+      /* distance from cursor */
+      float d = distance(uv, uMouse);
 
-      float center = centerMask(uv);
+      /* 🌊 ripple waves (key part) */
+      float wave = sin(d * 25.0 - uTime * 6.0);
+      float falloff = exp(-d * 4.0);
 
-      /* 🌫️ layer 1: main field */
-      float field1 = exp(-dist * (4.5 + center * 3.0));
+      float ripple = wave * falloff;
 
-      /* 🌫️ layer 2: inner cloud breathing (new) */
-      float nSlow = sin(uTime * 0.08 + uv.x * 2.0 + uv.y * 2.0);
-      float nSlow2 = cos(uTime * 0.06 - uv.x * 2.0);
+      /* base motion */
+      float n1 = sin(uTime * 0.25 + uv.y * 8.0);
+      float n2 = cos(uTime * 0.22 + uv.x * 8.0);
 
-      vec2 innerShift = vec2(nSlow, nSlow2) * 0.0025;
-
-      /* combine depth layers */
-      float field = field1 + center * 0.25;
-
-      float n1 = sin(uTime * 0.35 + (uv.y + innerShift.y) * (8.0 + center * 6.0));
-      float n2 = cos(uTime * 0.3 + (uv.x + innerShift.x) * (8.0 + center * 6.0));
-
-      uv += vec2(n1, n2) * 0.004 * field;
+      /* combine */
+      uv += vec2(n1, n2) * 0.003;
+      uv += ripple * 0.01;
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* exposure (kept stable) */
+      /* balanced exposure (your middle version) */
       float exposure = 1.10;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
