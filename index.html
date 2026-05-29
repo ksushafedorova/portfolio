@@ -14,7 +14,9 @@ html, body {
   color: #f2f2f2;
 }
 
-canvas { display:block; }
+canvas {
+  display: block;
+}
 
 .overlay {
   position: absolute;
@@ -35,48 +37,71 @@ main {
   pointer-events: none;
 }
 
-h1 { font-size:38px; font-weight:normal; margin-bottom:12px; }
-.subtitle { font-size:16px; color:#d9d9d9; margin-bottom:34px; }
-.description {
-  max-width:650px;
-  margin:0 auto;
-  line-height:1.7;
-  font-size:15px;
-  color:#cfcfcf;
-  margin-bottom:60px;
+h1 {
+  font-size: 38px;
+  font-weight: normal;
+  margin-bottom: 12px;
 }
 
-.menu { pointer-events:auto; }
+.subtitle {
+  font-size: 16px;
+  color: #d9d9d9;
+  margin-bottom: 34px;
+}
+
+.description {
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-size: 15px;
+  color: #cfcfcf;
+  margin-bottom: 60px;
+}
+
+.menu {
+  pointer-events: auto;
+}
 
 .stay {
-  display:inline-block;
-  cursor:pointer;
-  font-size:13px;
-  letter-spacing:3px;
-  opacity:0.75;
-  transition:0.3s;
+  display: inline-block;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 3px;
+  opacity: 0.75;
+  transition: 0.3s;
 }
-.stay:hover { opacity:1; transform:translateY(-2px); }
+
+.stay:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
 
 .dropdown {
-  margin-top:24px;
-  opacity:0;
-  max-height:0;
-  overflow:hidden;
-  transition:0.7s ease;
+  margin-top: 24px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: 0.7s ease;
 }
-.dropdown.open { opacity:1; max-height:400px; }
+
+.dropdown.open {
+  opacity: 1;
+  max-height: 400px;
+}
 
 .dropdown a {
-  display:block;
-  margin:14px 0;
-  color:#f2f2f2;
-  text-decoration:none;
-  font-size:15px;
-  letter-spacing:2px;
-  opacity:0.82;
+  display: block;
+  margin: 14px 0;
+  color: #f2f2f2;
+  text-decoration: none;
+  font-size: 15px;
+  letter-spacing: 2px;
+  opacity: 0.82;
 }
-.dropdown a:hover { opacity:1; }
+
+.dropdown a:hover {
+  opacity: 1;
+}
 </style>
 </head>
 
@@ -86,7 +111,11 @@ h1 { font-size:38px; font-weight:normal; margin-bottom:12px; }
 
 <main>
   <h1>Ksenia Fedorova</h1>
-  <div class="subtitle">composer / sound artist / theatre & film music</div>
+
+  <div class="subtitle">
+    composer / sound artist / theatre & film music
+  </div>
+
   <div class="description">
     I work with theatre, film, animation and experimental sound.
     My practice combines voice, piano, electronics and field recordings.
@@ -94,6 +123,7 @@ h1 { font-size:38px; font-weight:normal; margin-bottom:12px; }
 
   <div class="menu">
     <div class="stay" onclick="toggleMenu()">STAY SOUND +</div>
+
     <div class="dropdown" id="dropdown">
       <a href="theatre.html">THEATRE TRACE</a>
       <a href="film.html">FILM TRACE</a>
@@ -109,91 +139,80 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.mod
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias:true });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + velocity */
-const mouse = new THREE.Vector2(0.5,0.5);
-const prevMouse = new THREE.Vector2(0.5,0.5);
-const velocity = new THREE.Vector2();
+/* mouse + memory */
+const mouse = new THREE.Vector2(0.5, 0.5);
+const prevMouse = new THREE.Vector2(0.5, 0.5);
 
-window.addEventListener('mousemove', (e)=>{
-  const x = e.clientX / window.innerWidth;
-  const y = 1.0 - e.clientY / window.innerHeight;
-
-  velocity.x = x - mouse.x;
-  velocity.y = y - mouse.y;
-
-  prevMouse.copy(mouse);
-  mouse.set(x,y);
+window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX / window.innerWidth;
+  mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
 
-const geometry = new THREE.PlaneGeometry(2,2);
+const geometry = new THREE.PlaneGeometry(2, 2);
 
 const material = new THREE.ShaderMaterial({
 
-  uniforms:{
-    uTexture:{ value:texture },
-    uMouse:{ value:mouse },
-    uPrevMouse:{ value:prevMouse },
-    uVelocity:{ value:velocity },
-    uTime:{ value:0 }
+  uniforms: {
+    uTexture: { value: texture },
+    uMouse: { value: mouse },
+    uPrevMouse: { value: prevMouse },
+    uTime: { value: 0 }
   },
 
-  vertexShader:`
+  vertexShader: `
     varying vec2 vUv;
-    void main(){
+    void main() {
       vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `,
 
-  fragmentShader:`
+  fragmentShader: `
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
     uniform vec2 uPrevMouse;
-    uniform vec2 uVelocity;
     uniform float uTime;
 
     varying vec2 vUv;
 
-    void main(){
+    void main() {
 
       vec2 uv = vUv;
 
+      /* segment of motion (cursor trail) */
       float d = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
 
-      /* 🌊 base ripple (твоя хорошая версия) */
-      float wave = sin(d * 65.0 - uTime * 6.0);
+      /* finer ripple */
+      float wave = sin(d * 55.0 - uTime * 10.0);
+      float wave2 = sin(dp * 60.0 - uTime * 8.0);
+
       float falloff = exp(-d * 12.0);
+      float falloff2 = exp(-dp * 10.0);
 
-      float ripple = wave * falloff;
+      float ripple = wave * falloff + wave2 * falloff2;
 
-      /* 🌫️ soft memory (НО НЕ ШУМ) */
-      float speed = length(uVelocity);
+      /* subtle base motion */
+      float n1 = sin(uTime * 0.2 + uv.y * 10.0);
+      float n2 = cos(uTime * 0.18 + uv.x * 10.0);
 
-      float echo = exp(-d * 20.0) * speed * 0.03;
-      float echo2 = exp(-dp * 22.0) * speed * 0.02;
-
-      /* combine gently */
-      ripple += (echo + echo2);
-
-      /* final subtle distortion */
-      uv += ripple * 0.005;
+      uv += vec2(n1, n2) * 0.002;
+      uv += ripple * 0.004;
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* your stable contrast zone */
-      float exposure = 1.07;
+      float exposure = 1.10;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
@@ -207,21 +226,25 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-function animate(time){
+/* smooth memory of mouse */
+function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
-  renderer.render(scene,camera);
+
+  prevMouse.lerp(mouse, 0.08);
+
+  renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
 
 animate();
 
-window.addEventListener('resize', ()=>{
+window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 
 <script>
-function toggleMenu(){
+function toggleMenu() {
   document.getElementById('dropdown').classList.toggle('open');
 }
 </script>
