@@ -152,7 +152,7 @@ document.body.appendChild(renderer.domElement);
 /* TEXTURE */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 
-/* ✔ FIX 1: correct color space */
+/* COLOR SPACE FIX (важно для нормального света) */
 texture.colorSpace = THREE.SRGBColorSpace;
 
 /* MOUSE */
@@ -166,7 +166,7 @@ window.addEventListener('mousemove', (e) => {
 /* PLANE */
 const geometry = new THREE.PlaneGeometry(2, 2);
 
-/* MATERIAL */
+/* SHADER */
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
@@ -204,8 +204,8 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* ✔ FIX 2: subtle contrast restore */
-      color.rgb = ((color.rgb - 0.5) * 1.06) + 0.5;
+      /* 🌫️ мягкая плотность (без разрушения облаков) */
+      color.rgb = pow(color.rgb, vec3(0.92));
 
       gl_FragColor = color;
     }
@@ -228,6 +228,7 @@ animate();
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 </script>
 
 <script>
