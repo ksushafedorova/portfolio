@@ -202,13 +202,12 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* 🌫️ REAL exposure balance (noticeable change) */
-      float exposure = 1.18;
+      /* 🌗 balanced mid tone (final tuning) */
+      float exposure = 1.10;
 
       vec3 c = color.rgb * exposure;
 
-      /* soft rolloff to avoid burning */
-      c = c / (c + vec3(0.35));
+      c = c / (c + vec3(0.42));
 
       color.rgb = c;
 
