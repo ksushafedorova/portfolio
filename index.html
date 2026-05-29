@@ -151,8 +151,6 @@ document.body.appendChild(renderer.domElement);
 
 /* TEXTURE */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
-
-/* correct color handling */
 texture.colorSpace = THREE.SRGBColorSpace;
 
 /* MOUSE */
@@ -204,11 +202,13 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* 🌫️ neutral midtone balance (final correction) */
-      vec3 c = color.rgb;
+      /* 🌫️ REAL exposure balance (noticeable change) */
+      float exposure = 1.18;
 
-      c = (c - 0.5) * 1.04 + 0.5; // very light contrast balance
-      c += 0.01;                  // tiny lift (removes heaviness)
+      vec3 c = color.rgb * exposure;
+
+      /* soft rolloff to avoid burning */
+      c = c / (c + vec3(0.35));
 
       color.rgb = c;
 
@@ -220,7 +220,6 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* LOOP */
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
   renderer.render(scene, camera);
@@ -229,7 +228,6 @@ function animate(time) {
 
 animate();
 
-/* RESIZE */
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
