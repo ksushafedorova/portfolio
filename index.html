@@ -150,9 +150,8 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + memory */
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
-const prevMouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
@@ -166,7 +165,7 @@ const material = new THREE.ShaderMaterial({
   uniforms: {
     uTexture: { value: texture },
     uMouse: { value: mouse },
-    uPrevMouse: { value: prevMouse },
+    uPrevMouse: { value: new THREE.Vector2(0.5, 0.5) },
     uTime: { value: 0 }
   },
 
@@ -190,20 +189,26 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      /* segment of motion (cursor trail) */
-      float d = distance(uv, uMouse);
+      float d  = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
 
-      /* finer ripple */
-      float wave = sin(d * 55.0 - uTime * 10.0);
+      float wave  = sin(d * 55.0 - uTime * 10.0);
       float wave2 = sin(dp * 60.0 - uTime * 8.0);
 
-      float falloff = exp(-d * 12.0);
+      float falloff  = exp(-d * 12.0);
       float falloff2 = exp(-dp * 10.0);
 
       float ripple = wave * falloff + wave2 * falloff2;
 
-      /* subtle base motion */
+      /* 🌊 subtle “memory imprint” (SAFE VERSION) */
+      float speed = length(uMouse - uPrevMouse);
+
+      float imprint = exp(-d * 14.0) * speed;
+      imprint *= (0.6 + 0.4 * sin(uTime * 0.4));
+      imprint *= 0.30; // critical damping to avoid jelly
+
+      ripple += imprint;
+
       float n1 = sin(uTime * 0.2 + uv.y * 10.0);
       float n2 = cos(uTime * 0.18 + uv.x * 10.0);
 
@@ -216,9 +221,7 @@ const material = new THREE.ShaderMaterial({
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      color.rgb = c;
-
-      gl_FragColor = color;
+      gl_FragColor = vec4(c,1.0);
     }
   `
 });
@@ -226,12 +229,8 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* smooth memory of mouse */
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
-
-  prevMouse.lerp(mouse, 0.08);
-
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
