@@ -5,54 +5,68 @@
 <title>Ksenia Fedorova</title>
 
 <style>
+
+/* 🌫️ CHAOTIC FOAM DRIFT */
+
+@keyframes foamDriftBack {
+  0%   { transform: translate(-6px, 2px); }
+  18%  { transform: translate(10px, -4px); }
+  37%  { transform: translate(-14px, 6px); }
+  55%  { transform: translate(8px, 3px); }
+  73%  { transform: translate(-9px, -2px); }
+  100% { transform: translate(-6px, 2px); }
+}
+
+@keyframes foamDriftFront {
+  0%   { transform: translate(8px, -3px); }
+  20%  { transform: translate(-12px, 5px); }
+  41%  { transform: translate(6px, -6px); }
+  63%  { transform: translate(-7px, 4px); }
+  82%  { transform: translate(11px, 2px); }
+  100% { transform: translate(8px, -3px); }
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  color: #f2f2f2;
+  color: #d6d7db;
   background: #000;
   overflow-x: hidden;
 }
 
 a {
-  color: #f2f2f2;
+  color: inherit;
   text-decoration: none;
 }
 
-/* 🌫️ CLOUD LAYERS (БЕЗ АНИМАЦИИ) */
+/* 🫧 FOAM LAYERS */
 
-.back-layer,
-.front-layer {
-  position: fixed;
-  top: -40px;
-  left: -40px;
-  width: calc(100% + 80px);
-  height: calc(100% + 80px);
-
-  background: url('clouds.jpg') center/cover no-repeat;
-
-  will-change: transform;
-}
-
-/* back — глубина */
 .back-layer {
-  opacity: 0.45;
-  filter: contrast(1.5) brightness(1.15);
+  position: fixed;
+  inset: 0;
+  background: url('clouds.jpg') center/cover no-repeat;
+  opacity: 0.52;
+  filter: contrast(1.45) brightness(1.1);
+  animation: foamDriftBack 26s ease-in-out infinite;
   z-index: -2;
 }
 
-/* front — ближе */
 .front-layer {
-  opacity: 0.25;
-  filter: contrast(1.6) brightness(1.2);
+  position: fixed;
+  inset: 0;
+  background: url('clouds.jpg') center/cover no-repeat;
+  opacity: 0.28;
+  filter: contrast(1.6) brightness(1.15);
+  animation: foamDriftFront 19s ease-in-out infinite;
   z-index: -1;
 }
 
-/* overlay */
+/* 🌑 CONTROL */
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.28);
+  background: rgba(0,0,0,0.22);
   z-index: 0;
 }
 
@@ -60,7 +74,7 @@ a {
 
 main {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   max-width: 800px;
   margin: 0 auto;
   padding: 110px 40px;
@@ -76,30 +90,29 @@ h1 {
 
 .subtitle {
   font-size: 16px;
-  color: #e6e6e6;
   margin-bottom: 35px;
+  opacity: 0.9;
 }
 
 .description {
   font-size: 15px;
   line-height: 1.7;
-  color: #d0d0d0;
   margin-bottom: 70px;
+  opacity: 0.85;
 }
 
-/* STAY SOUND */
+/* 🫧 STAY SOUND */
 
 .stay-sound {
   display: inline-block;
   cursor: pointer;
   font-size: 13px;
   letter-spacing: 3px;
-  color: #d8d8d8;
 
-  opacity: 0.7;
+  opacity: 0.65;
   transform: translateY(4px);
 
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
   margin-bottom: 20px;
 }
 
@@ -133,20 +146,20 @@ h1 {
   margin: 14px 0;
   font-size: 15px;
   letter-spacing: 2px;
-  opacity: 0.82;
+  opacity: 0.85;
 }
 
 .dropdown a:hover {
   opacity: 1;
 }
+
 </style>
 </head>
 
 <body>
 
-<div class="back-layer" id="back"></div>
-<div class="front-layer" id="front"></div>
-
+<div class="back-layer"></div>
+<div class="front-layer"></div>
 <div class="overlay"></div>
 
 <main>
@@ -180,43 +193,6 @@ function toggleMenu() {
   document.getElementById('dropdown').classList.toggle('open');
   document.getElementById('stay').classList.toggle('active');
 }
-
-/* 🌫️ ONLY REACTIVE FIELD */
-
-const back = document.getElementById('back');
-const front = document.getElementById('front');
-
-let targetX = 0;
-let targetY = 0;
-let currentX = 0;
-let currentY = 0;
-
-document.addEventListener('mousemove', (e) => {
-
-  const x = (e.clientX / window.innerWidth - 0.5);
-  const y = (e.clientY / window.innerHeight - 0.5);
-
-  /* реакция чуть сильнее, чтобы стало ВИДНО */
-  targetX = x * 60;
-  targetY = y * 40;
-});
-
-function animate() {
-  /* инерция */
-  currentX += (targetX - currentX) * 0.1;
-  currentY += (targetY - currentY) * 0.1;
-
-  /* разные глубины */
-  back.style.transform =
-    `translate(${currentX * -0.35}px, ${currentY * -0.35}px)`;
-
-  front.style.transform =
-    `translate(${currentX}px, ${currentY}px)`;
-
-  requestAnimationFrame(animate);
-}
-
-animate();
 </script>
 
 </body>
