@@ -18,7 +18,7 @@ canvas {
   display: block;
 }
 
-/* UI OVERLAY */
+/* UI */
 
 .overlay {
   position: absolute;
@@ -27,8 +27,6 @@ canvas {
   pointer-events: none;
   z-index: 2;
 }
-
-/* TEXT */
 
 main {
   position: absolute;
@@ -45,7 +43,6 @@ h1 {
   font-size: 38px;
   font-weight: normal;
   margin-bottom: 12px;
-  letter-spacing: 1px;
 }
 
 .subtitle {
@@ -74,7 +71,7 @@ h1 {
   cursor: pointer;
   font-size: 13px;
   letter-spacing: 3px;
-  opacity: 0.72;
+  opacity: 0.75;
   transition: 0.3s;
 }
 
@@ -158,19 +155,19 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* TEXTURE */
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('clouds.jpg');
+const texture = new THREE.TextureLoader().load('clouds.jpg');
 
 /* MOUSE */
 const mouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - (e.clientY / window.innerHeight);
+  mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
 
-/* SHADER - NO DISTORTION */
+/* MATERIAL */
 const material = new THREE.ShaderMaterial({
+
   uniforms: {
     uTexture: { value: texture },
     uMouse: { value: mouse },
@@ -199,21 +196,20 @@ const material = new THREE.ShaderMaterial({
       float dist = distance(uv, uMouse);
       float field = exp(-dist * 6.0);
 
+      // 🌫️ ORIGINAL-LIKE SOFT FLOW (NO STRETCH FEEL)
+      float n1 = sin(uTime * 0.35 + uv.y * 10.0);
+      float n2 = cos(uTime * 0.3 + uv.x * 10.0);
+
+      uv += vec2(n1, n2) * 0.003 * field;
+
       vec4 color = texture2D(uTexture, uv);
-
-      // 🌫️ breathing light (no deformation)
-      float breath = sin(uTime * 0.9 + dist * 10.0) * 0.04;
-
-      color.rgb += breath * field;
-
-      // 🌊 subtle density shift
-      color.rgb *= 1.0 + field * 0.03;
 
       gl_FragColor = color;
     }
   `
 });
 
+/* PLANE */
 const geometry = new THREE.PlaneGeometry(2, 2);
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
