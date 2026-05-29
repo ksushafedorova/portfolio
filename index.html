@@ -204,13 +204,16 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* 🌫️ soft depth instead of contrast */
-      float depth = smoothstep(0.2, 1.0, dist);
+      /* 🌫️ softer depth (reduced contrast feeling) */
+      float depth = smoothstep(0.15, 0.95, dist);
 
-      vec3 lightLayer = color.rgb * 1.04;
-      vec3 darkLayer  = color.rgb * 0.93;
+      float lightAmt = 1.01;
+      float darkAmt  = 0.99;
 
-      color.rgb = mix(lightLayer, darkLayer, depth);
+      vec3 lightLayer = color.rgb * lightAmt;
+      vec3 darkLayer  = color.rgb * darkAmt;
+
+      color.rgb = mix(lightLayer, darkLayer, depth * 0.75);
 
       gl_FragColor = color;
     }
