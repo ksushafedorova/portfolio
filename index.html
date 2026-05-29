@@ -18,13 +18,17 @@ canvas {
   display: block;
 }
 
+/* UI OVERLAY */
+
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.22);
+  background: rgba(0,0,0,0.25);
   pointer-events: none;
   z-index: 2;
 }
+
+/* TEXT */
 
 main {
   position: absolute;
@@ -41,6 +45,7 @@ h1 {
   font-size: 38px;
   font-weight: normal;
   margin-bottom: 12px;
+  letter-spacing: 1px;
 }
 
 .subtitle {
@@ -57,6 +62,8 @@ h1 {
   color: #cfcfcf;
   margin-bottom: 60px;
 }
+
+/* MENU */
 
 .menu {
   pointer-events: auto;
@@ -110,6 +117,7 @@ h1 {
 <div class="overlay"></div>
 
 <main>
+
   <h1>Ksenia Fedorova</h1>
 
   <div class="subtitle">
@@ -133,6 +141,7 @@ h1 {
       <a href="fragments.html">FRAGMENTS</a>
     </div>
   </div>
+
 </main>
 
 <script type="module">
@@ -160,7 +169,7 @@ window.addEventListener('mousemove', (e) => {
   mouse.y = 1.0 - (e.clientY / window.innerHeight);
 });
 
-/* SHADER */
+/* SHADER - NO DISTORTION */
 const material = new THREE.ShaderMaterial({
   uniforms: {
     uTexture: { value: texture },
@@ -188,16 +197,19 @@ const material = new THREE.ShaderMaterial({
       vec2 uv = vUv;
 
       float dist = distance(uv, uMouse);
+      float field = exp(-dist * 6.0);
 
-      float field = exp(-dist * 10.0);
+      vec4 color = texture2D(uTexture, uv);
 
-      // 🌫️ very subtle motion (NO stretching)
-      float noiseX = sin(uTime * 0.3 + uv.y * 20.0) * 0.003;
-      float noiseY = cos(uTime * 0.25 + uv.x * 18.0) * 0.003;
+      // 🌫️ breathing light (no deformation)
+      float breath = sin(uTime * 0.9 + dist * 10.0) * 0.04;
 
-      uv += vec2(noiseX, noiseY) * field;
+      color.rgb += breath * field;
 
-      gl_FragColor = texture2D(uTexture, uv);
+      // 🌊 subtle density shift
+      color.rgb *= 1.0 + field * 0.03;
+
+      gl_FragColor = color;
     }
   `
 });
