@@ -11,159 +11,115 @@ html, body {
   overflow: hidden;
   background: #000;
   font-family: Arial, sans-serif;
-  color: #f2f2f2;
 }
-
-canvas { display: block; }
-
-main {
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  pointer-events: none;
-}
-
-h1 { font-size: 38px; font-weight: normal; margin-bottom: 12px; }
-.subtitle { font-size: 16px; color: #d9d9d9; margin-bottom: 34px; }
-.description {
-  max-width: 650px;
-  margin: 0 auto;
-  line-height: 1.7;
-  font-size: 15px;
-  color: #cfcfcf;
-  margin-bottom: 60px;
-}
+canvas { display:block; }
 </style>
 </head>
 
 <body>
-
-<main>
-  <h1>Ksenia Fedorova</h1>
-  <div class="subtitle">composer / sound artist</div>
-  <div class="description">interactive surface test</div>
-</main>
 
 <script type="module">
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
-const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
-camera.position.z = 1;
+
+const camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 
 const renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
+/* ---------------- TEXTURE ---------------- */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* ---------------- TRAIL SYSTEM ---------------- */
-
-const TRAIL_SIZE = 12;
-const trail = [];
-
-for (let i = 0; i < TRAIL_SIZE; i++) {
-  trail.push(new THREE.Vector2(0.5, 0.5));
-}
-
-window.addEventListener('mousemove', (e) => {
-  const x = e.clientX / window.innerWidth;
-  const y = 1.0 - e.clientY / window.innerHeight;
-
-  trail.unshift(new THREE.Vector2(x, y));
-  trail.pop();
+/* ---------------- MOUSE ---------------- */
+const mouse = new THREE.Vector2(0.5,0.5);
+window.addEventListener('mousemove', e=>{
+  mouse.x = e.clientX / innerWidth;
+  mouse.y = 1.0 - e.clientY / innerHeight;
 });
 
-/* flatten trail for shader */
-function getTrailArray() {
-  const arr = [];
-  for (let i = 0; i < TRAIL_SIZE; i++) {
-    arr.push(trail[i].x, trail[i].y);
-  }
-  return new Float32Array(arr);
-}
+/* ---------------- RENDER TARGETS (MEMORY) ---------------- */
+const rt1 = new THREE.WebGLRenderTarget(innerWidth, innerHeight);
+const rt2 = new THREE.WebGLRenderTarget(innerWidth, innerHeight);
 
-/* ---------------- SHADER ---------------- */
+/* ---------------- FULLSCREEN QUAD ---------------- */
+const geometry = new THREE.PlaneGeometry(2,2);
 
-const material = new THREE.ShaderMaterial({
-
-  uniforms: {
-    uTexture: { value: texture },
-    uTime: { value: 0 },
-    uTrail: { value: getTrailArray() }
+/* ---------------- FEEDBACK SHADER ---------------- */
+const feedbackMaterial = new THREE.ShaderMaterial({
+  uniforms:{
+    uPrev:{ value:null },
+    uMouse:{ value:mouse },
+    uTexture:{ value:texture }
   },
 
-  vertexShader: `
+  vertexShader:`
     varying vec2 vUv;
-    void main() {
+    void main(){
       vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      gl_Position = vec4(position,1.0);
     }
   `,
 
-  fragmentShader: `
+  fragmentShader:`
+    uniform sampler2D uPrev;
     uniform sampler2D uTexture;
-    uniform float uTime;
-    uniform float uTrail[24];
+    uniform vec2 uMouse;
 
     varying vec2 vUv;
 
-    void main() {
+    void main(){
 
       vec2 uv = vUv;
 
-      float ripple = 0.0;
+      vec4 prev = texture2D(uPrev, uv);
+      vec4 base = texture2D(uTexture, uv);
 
-      /* --- TRAIL INFLUENCE --- */
-      for (int i = 0; i < 12; i++) {
+      float d = distance(uv, uMouse);
 
-        vec2 p = vec2(uTrail[i*2], uTrail[i*2+1]);
+      /* very soft disturbance */
+      float ripple = exp(-d * 25.0) * 0.02;
 
-        float d = distance(uv, p);
+      /* feedback mix (key part) */
+      vec3 col = mix(base.rgb, prev.rgb, 0.92);
 
-        float strength = exp(-d * 18.0) * (1.0 - float(i) * 0.08);
+      col += ripple;
 
-        ripple += sin(d * 50.0 - uTime * 8.0) * strength;
-      }
+      /* keep stable */
+      col = clamp(col, 0.0, 1.0);
 
-      uv += ripple * 0.003;
-
-      vec4 color = texture2D(uTexture, uv);
-
-      float exposure = 1.08;
-      vec3 c = color.rgb * exposure;
-      c = c / (c + vec3(0.42));
-
-      gl_FragColor = vec4(c,1.0);
+      gl_FragColor = vec4(col,1.0);
     }
   `
 });
 
-const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2,2), material);
+const mesh = new THREE.Mesh(geometry, feedbackMaterial);
 scene.add(mesh);
 
 /* ---------------- LOOP ---------------- */
+function render(){
+  feedbackMaterial.uniforms.uPrev.value = rt1.texture;
 
-function animate(t){
-  material.uniforms.uTime.value = t * 0.001;
-  material.uniforms.uTrail.value = getTrailArray();
+  renderer.setRenderTarget(rt2);
+  renderer.render(scene, camera);
 
-  renderer.render(scene,camera);
-  requestAnimationFrame(animate);
+  renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
+
+  [rt1, rt2] = [rt2, rt1];
+
+  requestAnimationFrame(render);
 }
 
-animate();
+render();
 
-window.addEventListener('resize',()=>{
-  renderer.setSize(window.innerWidth, window.innerHeight);
+window.addEventListener('resize', ()=>{
+  renderer.setSize(innerWidth, innerHeight);
 });
-
 </script>
 
 </body>
