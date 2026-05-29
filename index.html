@@ -110,7 +110,6 @@ h1 {
 <div class="overlay"></div>
 
 <main>
-
   <h1>Ksenia Fedorova</h1>
 
   <div class="subtitle">
@@ -132,7 +131,6 @@ h1 {
       <a href="fragments.html">FRAGMENTS</a>
     </div>
   </div>
-
 </main>
 
 <script type="module">
@@ -184,7 +182,7 @@ const material = new THREE.ShaderMaterial({
 
     varying vec2 vUv;
 
-    float softZone(vec2 uv) {
+    float centerMask(vec2 uv) {
       return 1.0 - length(uv - vec2(0.5));
     }
 
@@ -194,18 +192,28 @@ const material = new THREE.ShaderMaterial({
 
       float dist = distance(uv, uMouse);
 
-      /* 🌫️ depth field (center alive, edges stable) */
-      float center = softZone(uv);
-      float field = exp(-dist * (4.5 + center * 3.0));
+      float center = centerMask(uv);
 
-      float n1 = sin(uTime * 0.35 + uv.y * (8.0 + center * 6.0));
-      float n2 = cos(uTime * 0.3 + uv.x * (8.0 + center * 6.0));
+      /* 🌫️ layer 1: main field */
+      float field1 = exp(-dist * (4.5 + center * 3.0));
+
+      /* 🌫️ layer 2: inner cloud breathing (new) */
+      float nSlow = sin(uTime * 0.08 + uv.x * 2.0 + uv.y * 2.0);
+      float nSlow2 = cos(uTime * 0.06 - uv.x * 2.0);
+
+      vec2 innerShift = vec2(nSlow, nSlow2) * 0.0025;
+
+      /* combine depth layers */
+      float field = field1 + center * 0.25;
+
+      float n1 = sin(uTime * 0.35 + (uv.y + innerShift.y) * (8.0 + center * 6.0));
+      float n2 = cos(uTime * 0.3 + (uv.x + innerShift.x) * (8.0 + center * 6.0));
 
       uv += vec2(n1, n2) * 0.004 * field;
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* balanced exposure (kept from your last good version) */
+      /* exposure (kept stable) */
       float exposure = 1.10;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
