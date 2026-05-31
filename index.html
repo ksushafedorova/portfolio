@@ -110,25 +110,26 @@ h1 {
 <div class="overlay"></div>
 
 <main>
-  <h1 id="title">Ksenia Fedorova</h1>
+  <h1>Ksenia Fedorova</h1>
 
-  <div class="subtitle" id="subtitle">
+  <div class="subtitle">
     composer / sound artist / theatre & film music
   </div>
 
-  <div class="description" id="description">
-    Select a trace
+  <div class="description">
+    I work with theatre, film, animation and experimental sound.
+    My practice combines voice, piano, electronics and field recordings.
   </div>
 
   <div class="menu">
     <div class="stay" onclick="toggleMenu()">STAY SOUND +</div>
 
     <div class="dropdown" id="dropdown">
-      <a href="#" onclick="setState('theatre')">THEATRE TRACE</a>
-      <a href="#" onclick="setState('film')">FILM TRACE</a>
-      <a href="#" onclick="setState('sound')">SOUND TRACE</a>
-      <a href="#" onclick="setState('solo')">SOLO PRACTICE</a>
-      <a href="#" onclick="setState('fragments')">FRAGMENTS</a>
+      <a href="theatre.html">THEATRE TRACE</a>
+      <a href="film.html">FILM TRACE</a>
+      <a href="sound.html">SOUND TRACE</a>
+      <a href="solo.html">SOLO PRACTICE</a>
+      <a href="fragments.html">FRAGMENTS</a>
     </div>
   </div>
 </main>
@@ -147,21 +148,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-/* --- STATES --- */
-const textures = {
-  theatre: new THREE.TextureLoader().load('clouds_theatre.jpg'),
-  film: new THREE.TextureLoader().load('clouds_film.jpg'),
-  sound: new THREE.TextureLoader().load('clouds_sound.jpg'),
-  solo: new THREE.TextureLoader().load('clouds_solo.jpg'),
-  fragments: new THREE.TextureLoader().load('clouds_fragments.jpg'),
-};
+const texture = new THREE.TextureLoader().load('clouds.jpg');
+texture.colorSpace = THREE.SRGBColorSpace;
 
-Object.values(textures).forEach(t => t.colorSpace = THREE.SRGBColorSpace);
-
-let state = 'theatre';
-let currentTexture = textures[state];
-
-/* mouse */
+/* mouse + memory */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
@@ -175,7 +165,7 @@ const geometry = new THREE.PlaneGeometry(2, 2);
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
-    uTexture: { value: currentTexture },
+    uTexture: { value: texture },
     uMouse: { value: mouse },
     uPrevMouse: { value: prevMouse },
     uTime: { value: 0 }
@@ -205,9 +195,12 @@ const material = new THREE.ShaderMaterial({
       float dp = distance(uv, uPrevMouse);
 
       float wave = sin(d * 55.0 - uTime * 10.0);
-      float falloff = exp(-d * 12.0);
+      float wave2 = sin(dp * 60.0 - uTime * 8.0);
 
-      float ripple = wave * falloff;
+      float falloff = exp(-d * 12.0);
+      float falloff2 = exp(-dp * 10.0);
+
+      float ripple = wave * falloff + wave2 * falloff2;
 
       float n1 = sin(uTime * 0.2 + uv.y * 10.0);
       float n2 = cos(uTime * 0.18 + uv.x * 10.0);
@@ -217,11 +210,13 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      float exposure = 1.12;
+      float exposure = 1.10;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      gl_FragColor = vec4(c, 1.0);
+      color.rgb = c;
+
+      gl_FragColor = color;
     }
   `
 });
@@ -229,7 +224,6 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* loop */
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
   prevMouse.lerp(mouse, 0.08);
@@ -242,24 +236,6 @@ animate();
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-/* STATE SWITCH */
-window.setState = function(newState) {
-  state = newState;
-
-  const newTex = textures[state];
-  material.uniforms.uTexture.value = newTex;
-
-  const desc = {
-    theatre: "Theatre works / main project",
-    film: "Film compositions",
-    sound: "Sound installations / audio works",
-    solo: "Solo practice",
-    fragments: "Fragments / sketches"
-  };
-
-  document.getElementById('description').innerText = desc[state];
-};
 
 </script>
 
