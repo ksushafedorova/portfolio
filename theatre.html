@@ -14,7 +14,6 @@ html, body {
   background: #000;
 }
 
-/* background canvas */
 canvas {
   position: fixed;
   top: 0;
@@ -22,21 +21,29 @@ canvas {
   z-index: 0;
 }
 
-/* layout */
+/* мягкое, НО НЕ ТУМАН */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0,0,0,0.15),
+    rgba(0,0,0,0.65)
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
 main {
   position: relative;
   z-index: 2;
-  width: 100%;
   text-align: center;
   padding: 120px 40px;
-  box-sizing: border-box;
 }
 
-/* typography */
 h1 {
   font-size: 38px;
   font-weight: normal;
-  margin-bottom: 12px;
 }
 
 .subtitle {
@@ -48,20 +55,8 @@ h1 {
 .description {
   max-width: 650px;
   margin: 0 auto 50px auto;
-  line-height: 1.7;
-  font-size: 15px;
   color: #bdbdbd;
-}
-
-/* hidden hotspot layer (cloud navigation) */
-.hotspot {
-  position: fixed;
-  width: 80px;
-  height: 80px;
-  z-index: 3;
-  cursor: pointer;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.0);
+  line-height: 1.7;
 }
 
 /* PANEL */
@@ -69,11 +64,11 @@ h1 {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -45%) scale(0.92);
+  transform: translate(-50%, -45%) scale(0.9);
 
   width: 520px;
-  background: rgba(0,0,0,0.72);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.75);
+  border: 1px solid rgba(255,255,255,0.15);
 
   padding: 18px;
   z-index: 10;
@@ -81,7 +76,7 @@ h1 {
   opacity: 0;
   pointer-events: none;
 
-  transition: 0.8s ease;
+  transition: 0.7s ease;
   backdrop-filter: blur(10px);
 }
 
@@ -93,12 +88,7 @@ h1 {
 
 .panel img {
   width: 100%;
-  margin-bottom: 12px;
-}
-
-.panel .title {
-  font-size: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .panel button {
@@ -109,53 +99,72 @@ h1 {
   color: #fff;
   cursor: pointer;
 }
+
+/* 🔵 VISIBLE CLOUD NODES */
+.hotspot {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 0 18px rgba(255,255,255,0.6);
+
+  z-index: 5;
+  cursor: pointer;
+
+  animation: pulse 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
 </style>
 </head>
 
 <body>
 
+<div class="overlay"></div>
+
 <main>
   <h1>Theatre Works</h1>
-  <div class="subtitle">Selected compositions for theatre productions</div>
-  <div class="description">Click on cloud points in the background.</div>
+  <div class="subtitle">Click glowing points in the clouds</div>
 </main>
 
-<!-- CLOUD NAVIGATION HIT AREA -->
-<div class="hotspot" data-id="theatre"></div>
+<!-- 🌊 visible navigation points -->
+<div class="hotspot" id="node1" style="left:55%; top:45%;"></div>
+<div class="hotspot" id="node2" style="left:35%; top:60%;"></div>
 
-<!-- FLOATING PANEL -->
+<!-- PANEL -->
 <div class="panel" id="panel">
   <img src="theatre1.jpg">
-  <div class="title">Children’s theatre production (Kazan)</div>
-
+  <div>Children’s theatre production (Kazan)</div>
   <audio id="audio" src="theatre1.mp3"></audio>
-
-  <button id="playBtn">PLAY</button>
+  <button id="btn">PLAY</button>
 </div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
-
 const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
 const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
-/* CLOUD TEXTURE */
+/* IMPORTANT: stronger, clearer background */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
+texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse */
 const mouse = new THREE.Vector2(0.5,0.5);
 const prevMouse = new THREE.Vector2(0.5,0.5);
 
 window.addEventListener('mousemove', e=>{
-  mouse.x = e.clientX/window.innerWidth;
-  mouse.y = 1 - e.clientY/window.innerHeight;
+  mouse.x = e.clientX/innerWidth;
+  mouse.y = 1 - e.clientY/innerHeight;
 });
 
 const material = new THREE.ShaderMaterial({
@@ -166,15 +175,15 @@ const material = new THREE.ShaderMaterial({
     uTime:{value:0}
   },
 
-  vertexShader: `
+  vertexShader:`
     varying vec2 vUv;
     void main(){
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      vUv=uv;
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
     }
   `,
 
-  fragmentShader: `
+  fragmentShader:`
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
     uniform vec2 uPrevMouse;
@@ -183,26 +192,26 @@ const material = new THREE.ShaderMaterial({
     varying vec2 vUv;
 
     void main(){
-      vec2 uv = vUv;
+      vec2 uv=vUv;
 
-      float d = distance(uv,uMouse);
-      float dp = distance(uv,uPrevMouse);
+      float d=distance(uv,uMouse);
+      float dp=distance(uv,uPrevMouse);
 
       float ripple =
-        sin(d*55.0-uTime*10.0)*exp(-d*12.0) +
-        sin(dp*60.0-uTime*8.0)*exp(-dp*10.0);
+        sin(d*55.0-uTime*10.0)*exp(-d*10.0) +
+        sin(dp*60.0-uTime*8.0)*exp(-dp*9.0);
 
       uv += vec2(
-        sin(uTime*0.2+uv.y*10.0),
-        cos(uTime*0.18+uv.x*10.0)
-      )*0.002;
+        sin(uTime*0.15+uv.y*8.0),
+        cos(uTime*0.15+uv.x*8.0)
+      )*0.0018;
 
-      uv += ripple*0.004;
+      uv += ripple*0.0035;
 
       vec4 c = texture2D(uTexture,uv);
 
-      vec3 col = c.rgb * 0.85;
-      col = col / (col + vec3(0.55));
+      vec3 col = c.rgb * 0.95;
+      col = col / (col + vec3(0.45));
 
       gl_FragColor = vec4(col,1.0);
     }
@@ -213,20 +222,23 @@ scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
 
 function animate(t){
   material.uniforms.uTime.value = t*0.001;
-  prevMouse.lerp(mouse,0.06);
+  prevMouse.lerp(mouse,0.08);
   renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
 animate();
 
-/* PANEL LOGIC */
+/* PANEL */
 const panel = document.getElementById('panel');
 const audio = document.getElementById('audio');
-const btn = document.getElementById('playBtn');
+const btn = document.getElementById('btn');
 
-document.querySelector('.hotspot').addEventListener('click', ()=>{
+function openPanel(){
   panel.classList.add('open');
-});
+}
+
+document.getElementById('node1').onclick = openPanel;
+document.getElementById('node2').onclick = openPanel;
 
 btn.onclick = () => {
   if(audio.paused){
@@ -237,10 +249,6 @@ btn.onclick = () => {
     btn.textContent = "PLAY";
   }
 };
-
-window.addEventListener('resize',()=>{
-  renderer.setSize(innerWidth,innerHeight);
-});
 </script>
 
 </body>
