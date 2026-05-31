@@ -14,6 +14,7 @@ html, body {
   background: #000;
 }
 
+/* background canvas */
 canvas {
   position: fixed;
   top: 0;
@@ -21,20 +22,20 @@ canvas {
   z-index: 0;
 }
 
-/* darker, deeper overlay (important change) */
+/* deep atmosphere */
 .overlay {
   position: fixed;
   inset: 0;
   background: radial-gradient(
     ellipse at center,
     rgba(0,0,0,0.25),
-    rgba(0,0,0,0.75)
+    rgba(0,0,0,0.78)
   );
   z-index: 1;
   pointer-events: none;
 }
 
-/* TEXT */
+/* layout */
 main {
   position: relative;
   z-index: 2;
@@ -44,6 +45,7 @@ main {
   box-sizing: border-box;
 }
 
+/* typography */
 h1 {
   font-size: 38px;
   font-weight: normal;
@@ -64,7 +66,7 @@ h1 {
   color: #bdbdbd;
 }
 
-/* PROJECT */
+/* project */
 h2 {
   font-size: 18px;
   font-weight: normal;
@@ -80,27 +82,39 @@ p {
   margin: 0 auto;
 }
 
-/* IMAGE becomes part of flow, less "loud" */
+/* 🌊 IMAGE: emerging object */
 img {
   width: 100%;
   max-width: 720px;
   margin: 25px auto;
   display: block;
-  opacity: 0.92;
-  filter: contrast(0.95) saturate(0.9);
-  border-radius: 2px;
+
+  opacity: 0;
+  transform: scale(0.86) translateY(18px);
+  filter: contrast(0.9) saturate(0.85) blur(1px);
+
+  transition:
+    transform 1.4s ease,
+    opacity 1.4s ease,
+    filter 1.4s ease;
 }
 
-/* AUDIO minimal */
+/* when loaded → “emerges” */
+img.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  filter: contrast(1) saturate(0.95) blur(0px);
+}
+
+/* audio minimal */
 audio {
   width: 100%;
   max-width: 720px;
   margin-top: 10px;
   opacity: 0.75;
-  filter: grayscale(1);
 }
 
-/* spacing instead of hr */
+/* spacing */
 .spacer {
   height: 60px;
 }
@@ -131,7 +145,7 @@ audio {
     Original music for a long-running repertory production in a state theatre.
   </p>
 
-  <img src="theatre1.jpg">
+  <img src="theatre1.jpg" id="theatreImg">
 
   <audio controls>
     <source src="theatre1.mp3" type="audio/mpeg">
@@ -140,7 +154,6 @@ audio {
 </main>
 
 <script type="module">
-
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
@@ -153,10 +166,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-/* BACKGROUND */
+/* background texture */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
@@ -215,7 +229,6 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      /* darker, cinematic grade */
       vec3 c = color.rgb;
       c *= 0.85;
       c = c / (c + vec3(0.55));
@@ -235,10 +248,17 @@ function animate(t){
 }
 animate();
 
+/* ✨ emergence trigger */
+window.addEventListener('load', () => {
+  const img = document.getElementById('theatreImg');
+  setTimeout(() => {
+    if (img) img.classList.add('visible');
+  }, 300);
+});
+
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 </script>
 
 </body>
