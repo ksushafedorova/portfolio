@@ -26,7 +26,6 @@ canvas {
   z-index: 2;
 }
 
-/* MAIN TEXT */
 main {
   position: absolute;
   z-index: 10;
@@ -56,25 +55,9 @@ h1 {
   line-height: 1.7;
   font-size: 15px;
   color: #cfcfcf;
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
 
-/* THEATRE CONTENT BLOCK */
-.theatre-block {
-  margin-top: 30px;
-  opacity: 0.95;
-}
-
-.theatre-image {
-  width: 260px;
-  height: auto;
-  margin: 0 auto;
-  display: block;
-  border-radius: 2px;
-  opacity: 0.9;
-}
-
-/* MENU */
 .menu {
   pointer-events: auto;
 }
@@ -127,30 +110,25 @@ h1 {
 <div class="overlay"></div>
 
 <main>
-  <h1>Ksenia Fedorova</h1>
+  <h1 id="title">Ksenia Fedorova</h1>
 
-  <div class="subtitle">
+  <div class="subtitle" id="subtitle">
     composer / sound artist / theatre & film music
   </div>
 
-  <div class="description">
-    Theatre Trace / main work environment
-  </div>
-
-  <!-- 🎭 THEATRE CONTENT -->
-  <div class="theatre-block">
-    <img class="theatre-image" src="clouds_theatre.jpg" />
+  <div class="description" id="description">
+    Select a trace
   </div>
 
   <div class="menu">
     <div class="stay" onclick="toggleMenu()">STAY SOUND +</div>
 
     <div class="dropdown" id="dropdown">
-      <a href="theatre.html">THEATRE TRACE</a>
-      <a href="film.html">FILM TRACE</a>
-      <a href="sound.html">SOUND TRACE</a>
-      <a href="solo.html">SOLO PRACTICE</a>
-      <a href="fragments.html">FRAGMENTS</a>
+      <a href="#" onclick="setState('theatre')">THEATRE TRACE</a>
+      <a href="#" onclick="setState('film')">FILM TRACE</a>
+      <a href="#" onclick="setState('sound')">SOUND TRACE</a>
+      <a href="#" onclick="setState('solo')">SOLO PRACTICE</a>
+      <a href="#" onclick="setState('fragments')">FRAGMENTS</a>
     </div>
   </div>
 </main>
@@ -169,9 +147,19 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-/* 🎭 THEATRE BACKGROUND */
-const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
-texture.colorSpace = THREE.SRGBColorSpace;
+/* --- STATES --- */
+const textures = {
+  theatre: new THREE.TextureLoader().load('clouds_theatre.jpg'),
+  film: new THREE.TextureLoader().load('clouds_film.jpg'),
+  sound: new THREE.TextureLoader().load('clouds_sound.jpg'),
+  solo: new THREE.TextureLoader().load('clouds_solo.jpg'),
+  fragments: new THREE.TextureLoader().load('clouds_fragments.jpg'),
+};
+
+Object.values(textures).forEach(t => t.colorSpace = THREE.SRGBColorSpace);
+
+let state = 'theatre';
+let currentTexture = textures[state];
 
 /* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
@@ -187,7 +175,7 @@ const geometry = new THREE.PlaneGeometry(2, 2);
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
-    uTexture: { value: texture },
+    uTexture: { value: currentTexture },
     uMouse: { value: mouse },
     uPrevMouse: { value: prevMouse },
     uTime: { value: 0 }
@@ -217,12 +205,9 @@ const material = new THREE.ShaderMaterial({
       float dp = distance(uv, uPrevMouse);
 
       float wave = sin(d * 55.0 - uTime * 10.0);
-      float wave2 = sin(dp * 60.0 - uTime * 8.0);
-
       float falloff = exp(-d * 12.0);
-      float falloff2 = exp(-dp * 10.0);
 
-      float ripple = wave * falloff + wave2 * falloff2;
+      float ripple = wave * falloff;
 
       float n1 = sin(uTime * 0.2 + uv.y * 10.0);
       float n2 = cos(uTime * 0.18 + uv.x * 10.0);
@@ -232,13 +217,11 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      float exposure = 1.15;
+      float exposure = 1.12;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      color.rgb = c;
-
-      gl_FragColor = color;
+      gl_FragColor = vec4(c, 1.0);
     }
   `
 });
@@ -259,6 +242,25 @@ animate();
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+/* STATE SWITCH */
+window.setState = function(newState) {
+  state = newState;
+
+  const newTex = textures[state];
+  material.uniforms.uTexture.value = newTex;
+
+  const desc = {
+    theatre: "Theatre works / main project",
+    film: "Film compositions",
+    sound: "Sound installations / audio works",
+    solo: "Solo practice",
+    fragments: "Fragments / sketches"
+  };
+
+  document.getElementById('description').innerText = desc[state];
+};
+
 </script>
 
 <script>
