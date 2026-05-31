@@ -9,83 +9,38 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: Arial, sans-serif;
-  color: #f2f2f2;
   background: #000;
+  font-family: Arial, sans-serif;
 }
 
 canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
   display: block;
-  z-index: 0;
 }
 
-/* UI layer */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-  z-index: 2;
-  pointer-events: none;
-}
-
+/* минимальный текст */
 main {
   position: absolute;
-  z-index: 3;
-  width: 100%;
+  z-index: 2;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  color: #f2f2f2;
+  pointer-events: none;
 }
 
 h1 {
-  font-size: 38px;
+  font-size: 36px;
   font-weight: normal;
-  margin-bottom: 12px;
-}
-
-.subtitle {
-  font-size: 16px;
-  color: #d9d9d9;
-  margin-bottom: 34px;
-}
-
-/* clickable hint */
-.hotspot {
-  position: fixed;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.6);
-  cursor: pointer;
-  z-index: 4;
-  transform: translate(-50%, -50%);
-}
-
-.hotspot::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.2);
 }
 </style>
 </head>
 
 <body>
 
-<div class="overlay"></div>
-
 <main>
   <h1>Theatre Works</h1>
-  <div class="subtitle">click in the space</div>
 </main>
-
-<!-- hotspot on "cloud area" -->
-<div class="hotspot" id="theatreSpot" style="left:60%; top:45%;"></div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
@@ -100,8 +55,8 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
-/* ORIGINAL-STYLE TEXTURE (NO TINT CHANGE) */
-const texture = new THREE.TextureLoader().load('clouds.jpg');
+/* 🎭 THE ONLY BACKGROUND */
+const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
 /* mouse */
@@ -113,7 +68,9 @@ window.addEventListener('mousemove', e=>{
   mouse.y = 1 - e.clientY/innerHeight;
 });
 
+/* shader */
 const material = new THREE.ShaderMaterial({
+
   uniforms:{
     uTexture:{value:texture},
     uMouse:{value:mouse},
@@ -154,9 +111,7 @@ const material = new THREE.ShaderMaterial({
 
       uv += ripple*0.004;
 
-      vec4 c=texture2D(uTexture,uv);
-
-      gl_FragColor=c;
+      gl_FragColor = texture2D(uTexture, uv);
     }
   `
 });
@@ -174,11 +129,6 @@ animate();
 window.addEventListener('resize',()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
-
-/* CLICK HOTSPOT */
-document.getElementById("theatreSpot").onclick = () => {
-  alert("THEATRE TRACE opens here (next step we will load module)");
-};
 </script>
 
 </body>
