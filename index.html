@@ -128,6 +128,7 @@ h1 {
       <a href="theatre.html">THEATRE TRACE</a>
       <a href="film.html">FILM TRACE</a>
       <a href="sound.html">SOUND TRACE</a>
+      <a href="solo.html">SOLO PRACTICE</a>
       <a href="fragments.html">FRAGMENTS</a>
     </div>
   </div>
@@ -190,11 +191,9 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      /* segment of motion (cursor trail) */
       float d = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
 
-      /* finer ripple */
       float wave = sin(d * 55.0 - uTime * 10.0);
       float wave2 = sin(dp * 60.0 - uTime * 8.0);
 
@@ -203,7 +202,6 @@ const material = new THREE.ShaderMaterial({
 
       float ripple = wave * falloff + wave2 * falloff2;
 
-      /* subtle base motion */
       float n1 = sin(uTime * 0.2 + uv.y * 10.0);
       float n2 = cos(uTime * 0.18 + uv.x * 10.0);
 
@@ -226,12 +224,9 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
-/* smooth memory of mouse */
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
-
   prevMouse.lerp(mouse, 0.08);
-
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
@@ -241,6 +236,7 @@ animate();
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
 </script>
 
 <script>
