@@ -26,6 +26,7 @@ canvas {
   z-index: 2;
 }
 
+/* MAIN TEXT */
 main {
   position: absolute;
   z-index: 10;
@@ -55,9 +56,25 @@ h1 {
   line-height: 1.7;
   font-size: 15px;
   color: #cfcfcf;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
 }
 
+/* THEATRE CONTENT BLOCK */
+.theatre-block {
+  margin-top: 30px;
+  opacity: 0.95;
+}
+
+.theatre-image {
+  width: 260px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  border-radius: 2px;
+  opacity: 0.9;
+}
+
+/* MENU */
 .menu {
   pointer-events: auto;
 }
@@ -117,8 +134,12 @@ h1 {
   </div>
 
   <div class="description">
-    I work with theatre, film, animation and experimental sound.
-    My practice combines voice, piano, electronics and field recordings.
+    Theatre Trace / main work environment
+  </div>
+
+  <!-- 🎭 THEATRE CONTENT -->
+  <div class="theatre-block">
+    <img class="theatre-image" src="clouds_theatre.jpg" />
   </div>
 
   <div class="menu">
@@ -148,10 +169,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-const texture = new THREE.TextureLoader().load('clouds.jpg');
+/* 🎭 THEATRE BACKGROUND */
+const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + memory */
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
@@ -210,7 +232,7 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      float exposure = 1.10;
+      float exposure = 1.15;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
@@ -224,6 +246,7 @@ const material = new THREE.ShaderMaterial({
 const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
+/* loop */
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
   prevMouse.lerp(mouse, 0.08);
@@ -236,7 +259,6 @@ animate();
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 </script>
 
 <script>
