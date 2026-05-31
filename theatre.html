@@ -8,125 +8,126 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  background: #000;
+  overflow: auto;
   font-family: Arial, sans-serif;
   color: #f2f2f2;
+  background: #000;
 }
 
-/* BACKGROUND */
 canvas {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 0;
 }
 
-/* NO HARD OVERLAY (важно) */
-
-/* UI LAYER */
-.ui {
+/* UI */
+main {
   position: relative;
   z-index: 2;
-}
-
-/* HEADER */
-header {
-  position: fixed;
-  top: 40px;
-  width: 100%;
-  text-align: center;
-  z-index: 3;
-  pointer-events: none;
+  padding: 120px 60px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 h1 {
-  font-weight: 400;
-  font-size: 34px;
-  margin: 0;
+  font-size: 38px;
+  font-weight: normal;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .subtitle {
-  font-size: 14px;
-  opacity: 0.7;
+  text-align: center;
+  font-size: 16px;
+  color: #cfcfcf;
+  margin-bottom: 40px;
 }
 
-/* CLOUD NAV ZONES (invisible hotspots) */
-.cloudZone {
-  position: fixed;
-  width: 220px;
-  height: 140px;
-  cursor: pointer;
-  z-index: 3;
+/* PROJECT */
+.project {
+  display: flex;
+  gap: 40px;
+  align-items: center;
 }
 
-/* просто "облака-области" */
-#cloud1 { top: 35%; left: 20%; }
-#cloud2 { top: 25%; left: 55%; }
-#cloud3 { top: 60%; left: 70%; }
-
-/* PROJECT PANEL */
-.panel {
-  position: fixed;
-  right: 60px;
-  bottom: 60px;
-  width: 420px;
-
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(10px);
-
-  padding: 20px;
-  border: 1px solid rgba(255,255,255,0.15);
-
+.project img {
+  width: 320px;
   opacity: 0;
-  transform: translateY(20px);
-  transition: 0.6s ease;
-
-  z-index: 5;
+  transform: translateY(25px) scale(0.92);
+  transition: all 1.2s ease;
 }
 
-.panel.open {
+.project img.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
-.panel img {
-  width: 100%;
-  margin-bottom: 14px;
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.panel button {
+.playBtn {
+  width: 120px;
   padding: 10px 14px;
   border: 1px solid rgba(255,255,255,0.4);
   background: transparent;
-  color: white;
+  color: #fff;
   cursor: pointer;
 }
 
-.panel button:hover {
-  border-color: white;
+.text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cfcfcf;
+  max-width: 420px;
 }
+
+/* ===== CLOUD NAVIGATION LAYER ===== */
+.cloud {
+  position: fixed;
+  z-index: 3;
+  cursor: pointer;
+  pointer-events: auto;
+  background: transparent;
+}
+
+/* позиции = “примерно где облака на фоне” */
+#cloud1 { top: 25%; left: 20%; width: 200px; height: 120px; }
+#cloud2 { top: 40%; left: 55%; width: 240px; height: 140px; }
+#cloud3 { top: 60%; left: 30%; width: 220px; height: 130px; }
+
+/* debug (включи если надо видеть зоны)
+.cloud { border: 1px solid rgba(255,255,255,0.2); }
+*/
 </style>
 </head>
 
 <body>
 
-<header>
+<!-- CLOUD CLICK ZONES -->
+<div class="cloud" id="cloud1"></div>
+<div class="cloud" id="cloud2"></div>
+<div class="cloud" id="cloud3"></div>
+
+<main>
   <h1>Theatre Works</h1>
-  <div class="subtitle">click through clouds</div>
-</header>
+  <div class="subtitle">Selected compositions for theatre productions</div>
 
-<!-- CLOUD HOTSPOTS -->
-<div class="cloudZone" id="cloud1"></div>
-<div class="cloudZone" id="cloud2"></div>
-<div class="cloudZone" id="cloud3"></div>
+  <div class="project">
+    <img src="theatre1.jpg" id="img">
 
-<!-- PROJECT PANEL -->
-<div class="panel" id="panel">
-  <img id="pImg" src="">
-  <div id="pText"></div>
-  <br>
-  <button id="playBtn">PLAY</button>
-</div>
+    <div class="right">
+      <div class="text">
+        Children’s theatre production (Kazan). Original music for repertory theatre.
+      </div>
+
+      <button class="playBtn" id="playBtn">PLAY</button>
+    </div>
+  </div>
+</main>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
@@ -139,7 +140,7 @@ const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-/* BACKGROUND CLOUDS */
+/* BACKGROUND */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 
 const mouse = new THREE.Vector2(0.5,0.5);
@@ -184,19 +185,19 @@ const material = new THREE.ShaderMaterial({
         sin(d*55.0-uTime*10.0)*exp(-d*12.0)+
         sin(dp*60.0-uTime*8.0)*exp(-dp*10.0);
 
-      uv += vec2(
+      uv+=vec2(
         sin(uTime*0.2+uv.y*10.0),
         cos(uTime*0.18+uv.x*10.0)
       )*0.002;
 
-      uv += ripple*0.004;
+      uv+=ripple*0.004;
 
-      vec4 c = texture2D(uTexture,uv);
+      vec4 c=texture2D(uTexture,uv);
 
-      vec3 col = c.rgb*0.9;
-      col = col/(col+vec3(0.55));
+      vec3 col=c.rgb*0.9;
+      col=col/(col+vec3(0.55));
 
-      gl_FragColor = vec4(col,1.0);
+      gl_FragColor=vec4(col,1.0);
     }
   `
 });
@@ -204,62 +205,45 @@ const material = new THREE.ShaderMaterial({
 scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
 
 function animate(t){
-  material.uniforms.uTime.value = t*0.001;
+  material.uniforms.uTime.value=t*0.001;
   prevMouse.lerp(mouse,0.06);
   renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
 animate();
 
-/* PANEL LOGIC */
-const panel = document.getElementById('panel');
-const img = document.getElementById('pImg');
-const text = document.getElementById('pText');
+/* IMAGE */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('img')?.classList.add('visible');
+  },400);
+});
 
+/* AUDIO */
 const audio = new Audio('theatre1.mp3');
 let playing = false;
 
-document.getElementById('playBtn').onclick = ()=>{
+playBtn.onclick = ()=>{
   if(!playing){
     audio.play();
     playing = true;
+    playBtn.textContent = "PAUSE";
   } else {
     audio.pause();
     playing = false;
+    playBtn.textContent = "PLAY";
   }
 };
 
-/* CLOUD CONTENT MAP */
-const projects = {
-  cloud1: {
-    img: 'theatre1.jpg',
-    text: 'Children’s theatre production (Kazan). Repertory theatre score.'
-  },
-  cloud2: {
-    img: 'theatre2.jpg',
-    text: 'Experimental stage work with live performers.'
-  },
-  cloud3: {
-    img: 'theatre3.jpg',
-    text: 'Student / research theatre composition.'
-  }
-};
-
-function openProject(id){
-  const p = projects[id];
-  if(!p) return;
-
-  img.src = p.img;
-  text.innerText = p.text;
-
-  panel.classList.add('open');
+/* CLOUD NAVIGATION */
+function goToProject(id){
+  alert("open: " + id); 
+  // потом заменим на смену контента
 }
 
-document.querySelectorAll('.cloudZone').forEach(el=>{
-  el.addEventListener('click', ()=>{
-    openProject(el.id);
-  });
-});
+document.getElementById('cloud1').onclick = ()=> goToProject('project1');
+document.getElementById('cloud2').onclick = ()=> goToProject('project2');
+document.getElementById('cloud3').onclick = ()=> goToProject('project3');
 
 window.addEventListener('resize',()=>{
   renderer.setSize(innerWidth,innerHeight);
