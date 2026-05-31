@@ -11,13 +11,14 @@ html, body {
   overflow: hidden;
   background: #000;
   font-family: Arial, sans-serif;
+  color: #f2f2f2;
 }
 
 canvas {
   display: block;
 }
 
-/* минимальный текст */
+/* минимальный текст поверх */
 main {
   position: absolute;
   z-index: 2;
@@ -25,13 +26,17 @@ main {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  color: #f2f2f2;
   pointer-events: none;
 }
 
 h1 {
-  font-size: 36px;
+  font-size: 34px;
   font-weight: normal;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: 0.8;
 }
 </style>
 </head>
@@ -40,6 +45,7 @@ h1 {
 
 <main>
   <h1>Theatre Works</h1>
+  <div class="subtitle">Selected compositions</div>
 </main>
 
 <script type="module">
@@ -55,7 +61,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
-/* 🎭 THE ONLY BACKGROUND */
+/* 🎭 BACKGROUND (ВАШИ ОБЛАКА) */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
@@ -68,7 +74,6 @@ window.addEventListener('mousemove', e=>{
   mouse.y = 1 - e.clientY/innerHeight;
 });
 
-/* shader */
 const material = new THREE.ShaderMaterial({
 
   uniforms:{
@@ -81,8 +86,8 @@ const material = new THREE.ShaderMaterial({
   vertexShader:`
     varying vec2 vUv;
     void main(){
-      vUv=uv;
-      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
   `,
 
@@ -95,39 +100,39 @@ const material = new THREE.ShaderMaterial({
     varying vec2 vUv;
 
     void main(){
-      vec2 uv=vUv;
+      vec2 uv = vUv;
 
-      float d=distance(uv,uMouse);
-      float dp=distance(uv,uPrevMouse);
+      float d = distance(uv, uMouse);
+      float dp = distance(uv, uPrevMouse);
 
       float ripple =
-        sin(d*55.0-uTime*10.0)*exp(-d*12.0) +
-        sin(dp*60.0-uTime*8.0)*exp(-dp*10.0);
+        sin(d*55.0 - uTime*10.0)*exp(-d*12.0) +
+        sin(dp*60.0 - uTime*8.0)*exp(-dp*10.0);
 
       uv += vec2(
-        sin(uTime*0.2+uv.y*10.0),
-        cos(uTime*0.18+uv.x*10.0)
-      )*0.002;
+        sin(uTime*0.2 + uv.y*10.0),
+        cos(uTime*0.18 + uv.x*10.0)
+      ) * 0.002;
 
-      uv += ripple*0.004;
+      uv += ripple * 0.004;
 
       gl_FragColor = texture2D(uTexture, uv);
     }
   `
 });
 
-scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), material));
 
 function animate(t){
-  material.uniforms.uTime.value=t*0.001;
-  prevMouse.lerp(mouse,0.08);
-  renderer.render(scene,camera);
+  material.uniforms.uTime.value = t * 0.001;
+  prevMouse.lerp(mouse, 0.08);
+  renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
 animate();
 
-window.addEventListener('resize',()=>{
-  renderer.setSize(innerWidth,innerHeight);
+window.addEventListener('resize', () => {
+  renderer.setSize(innerWidth, innerHeight);
 });
 </script>
 
