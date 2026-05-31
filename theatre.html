@@ -10,8 +10,8 @@ html, body {
   padding: 0;
   overflow: auto;
   font-family: Arial, sans-serif;
-  color: #f2f2f2;
   background: #000;
+  color: #f2f2f2;
 }
 
 canvas {
@@ -21,7 +21,7 @@ canvas {
   z-index: 0;
 }
 
-/* мягкое, НО НЕ ТУМАН */
+/* нормальная глубина, НЕ туман */
 .overlay {
   position: fixed;
   inset: 0;
@@ -52,72 +52,41 @@ h1 {
   margin-bottom: 30px;
 }
 
-.description {
-  max-width: 650px;
-  margin: 0 auto 50px auto;
-  color: #bdbdbd;
-  line-height: 1.7;
-}
-
 /* PANEL */
 .panel {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -45%) scale(0.9);
+  transform: translate(-50%, -50%) scale(0.9);
 
   width: 520px;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.8);
   border: 1px solid rgba(255,255,255,0.15);
 
-  padding: 18px;
+  padding: 15px;
   z-index: 10;
 
   opacity: 0;
   pointer-events: none;
-
-  transition: 0.7s ease;
-  backdrop-filter: blur(10px);
+  transition: 0.6s ease;
 }
 
 .panel.open {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .panel img {
   width: 100%;
+  display: block;
   margin-bottom: 10px;
 }
 
-.panel button {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border: 1px solid #fff;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-}
-
-/* 🔵 VISIBLE CLOUD NODES */
-.hotspot {
+/* subtle label inside clouds (debug optional) */
+.label {
   position: fixed;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.85);
-  box-shadow: 0 0 18px rgba(255,255,255,0.6);
-
   z-index: 5;
-  cursor: pointer;
-
-  animation: pulse 2.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0%,100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.4); opacity: 1; }
 }
 </style>
 </head>
@@ -128,12 +97,8 @@ h1 {
 
 <main>
   <h1>Theatre Works</h1>
-  <div class="subtitle">Click glowing points in the clouds</div>
+  <div class="subtitle">Click inside the clouds</div>
 </main>
-
-<!-- 🌊 visible navigation points -->
-<div class="hotspot" id="node1" style="left:55%; top:45%;"></div>
-<div class="hotspot" id="node2" style="left:35%; top:60%;"></div>
 
 <!-- PANEL -->
 <div class="panel" id="panel">
@@ -155,80 +120,94 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
-/* IMPORTANT: stronger, clearer background */
+/* BACKGROUND */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-const mouse = new THREE.Vector2(0.5,0.5);
-const prevMouse = new THREE.Vector2(0.5,0.5);
+/* mouse */
+const mouse = new THREE.Vector2();
+const raycaster = new THREE.Raycaster();
 
-window.addEventListener('mousemove', e=>{
-  mouse.x = e.clientX/innerWidth;
-  mouse.y = 1 - e.clientY/innerHeight;
-});
-
-const material = new THREE.ShaderMaterial({
+/* shader background (как у тебя было — оставляем живым) */
+const mat = new THREE.ShaderMaterial({
   uniforms:{
     uTexture:{value:texture},
     uMouse:{value:mouse},
-    uPrevMouse:{value:prevMouse},
     uTime:{value:0}
   },
-
   vertexShader:`
     varying vec2 vUv;
     void main(){
-      vUv=uv;
-      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
   `,
-
   fragmentShader:`
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
-    uniform vec2 uPrevMouse;
     uniform float uTime;
-
     varying vec2 vUv;
 
     void main(){
-      vec2 uv=vUv;
+      vec2 uv = vUv;
 
-      float d=distance(uv,uMouse);
-      float dp=distance(uv,uPrevMouse);
-
-      float ripple =
-        sin(d*55.0-uTime*10.0)*exp(-d*10.0) +
-        sin(dp*60.0-uTime*8.0)*exp(-dp*9.0);
-
-      uv += vec2(
-        sin(uTime*0.15+uv.y*8.0),
-        cos(uTime*0.15+uv.x*8.0)
-      )*0.0018;
-
-      uv += ripple*0.0035;
+      float d = distance(uv,uMouse);
+      uv += sin(uTime*0.1 + uv.y*8.0)*0.002;
+      uv += sin(d*50.0 - uTime*8.0)*0.003;
 
       vec4 c = texture2D(uTexture,uv);
-
-      vec3 col = c.rgb * 0.95;
-      col = col / (col + vec3(0.45));
+      vec3 col = c.rgb * 0.9;
+      col = col / (col + vec3(0.5));
 
       gl_FragColor = vec4(col,1.0);
     }
   `
 });
 
-scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
 
-function animate(t){
-  material.uniforms.uTime.value = t*0.001;
-  prevMouse.lerp(mouse,0.08);
-  renderer.render(scene,camera);
-  requestAnimationFrame(animate);
+/* 🌫 CLOUD OBJECTS (НАВИГАЦИЯ ВНУТРИ СЦЕНЫ) */
+const objects = [];
+
+function createNode(x,y,id){
+  const geo = new THREE.SphereGeometry(0.03,16,16);
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent:true,
+    opacity:0.9
+  });
+
+  const mesh = new THREE.Mesh(geo,mat);
+  mesh.position.set(x,y,0);
+  mesh.userData.id = id;
+
+  scene.add(mesh);
+  objects.push(mesh);
 }
-animate();
 
-/* PANEL */
+createNode(-0.3,0.2,"theatre");
+createNode(0.2,-0.1,"theatre");
+createNode(0.4,0.25,"theatre");
+
+/* interaction */
+window.addEventListener('mousemove',(e)=>{
+  mouse.x = e.clientX/innerWidth;
+  mouse.y = 1 - e.clientY/innerHeight;
+});
+
+window.addEventListener('click',(e)=>{
+  const x = (e.clientX/innerWidth)*2-1;
+  const y = -(e.clientY/innerHeight)*2+1;
+
+  raycaster.setFromCamera({x,y},camera);
+  const hit = raycaster.intersectObjects(objects);
+
+  if(hit.length){
+    openPanel();
+  }
+});
+
+/* panel */
 const panel = document.getElementById('panel');
 const audio = document.getElementById('audio');
 const btn = document.getElementById('btn');
@@ -237,18 +216,32 @@ function openPanel(){
   panel.classList.add('open');
 }
 
-document.getElementById('node1').onclick = openPanel;
-document.getElementById('node2').onclick = openPanel;
-
-btn.onclick = () => {
+btn.onclick = ()=>{
   if(audio.paused){
     audio.play();
-    btn.textContent = "PAUSE";
+    btn.textContent="PAUSE";
   } else {
     audio.pause();
-    btn.textContent = "PLAY";
+    btn.textContent="PLAY";
   }
 };
+
+/* loop */
+function animate(t){
+  mat.uniforms.uTime.value = t*0.001;
+
+  objects.forEach((o,i)=>{
+    o.position.y += Math.sin(t*0.001 + i)*0.0005;
+  });
+
+  renderer.render(scene,camera);
+  requestAnimationFrame(animate);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight);
+});
 </script>
 
 </body>
