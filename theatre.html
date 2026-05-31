@@ -8,20 +8,18 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: auto;
-  font-family: Arial, sans-serif;
+  overflow: hidden;
   background: #000;
+  font-family: Arial, sans-serif;
   color: #f2f2f2;
 }
 
 canvas {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 0;
 }
 
-/* нормальная глубина, НЕ туман */
 .overlay {
   position: fixed;
   inset: 0;
@@ -34,41 +32,23 @@ canvas {
   pointer-events: none;
 }
 
-main {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  padding: 120px 40px;
-}
-
-h1 {
-  font-size: 38px;
-  font-weight: normal;
-}
-
-.subtitle {
-  font-size: 16px;
-  color: #cfcfcf;
-  margin-bottom: 30px;
-}
-
 /* PANEL */
 .panel {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
+  transform: translate(-50%, -50%) scale(0.95);
 
   width: 520px;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.85);
   border: 1px solid rgba(255,255,255,0.15);
 
-  padding: 15px;
+  padding: 16px;
   z-index: 10;
 
   opacity: 0;
   pointer-events: none;
-  transition: 0.6s ease;
+  transition: 0.5s ease;
 }
 
 .panel.open {
@@ -79,14 +59,17 @@ h1 {
 
 .panel img {
   width: 100%;
-  display: block;
   margin-bottom: 10px;
 }
 
-/* subtle label inside clouds (debug optional) */
-.label {
+/* hint */
+.hint {
   position: fixed;
-  z-index: 5;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
 }
 </style>
 </head>
@@ -94,13 +77,8 @@ h1 {
 <body>
 
 <div class="overlay"></div>
+<div class="hint">click glowing clouds</div>
 
-<main>
-  <h1>Theatre Works</h1>
-  <div class="subtitle">Click inside the clouds</div>
-</main>
-
-<!-- PANEL -->
 <div class="panel" id="panel">
   <img src="theatre1.jpg">
   <div>Children’s theatre production (Kazan)</div>
@@ -115,7 +93,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
@@ -124,15 +102,9 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse */
-const mouse = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
-
-/* shader background (как у тебя было — оставляем живым) */
-const mat = new THREE.ShaderMaterial({
+const material = new THREE.ShaderMaterial({
   uniforms:{
     uTexture:{value:texture},
-    uMouse:{value:mouse},
     uTime:{value:0}
   },
   vertexShader:`
@@ -144,32 +116,32 @@ const mat = new THREE.ShaderMaterial({
   `,
   fragmentShader:`
     uniform sampler2D uTexture;
-    uniform vec2 uMouse;
     uniform float uTime;
     varying vec2 vUv;
 
     void main(){
       vec2 uv = vUv;
 
-      float d = distance(uv,uMouse);
-      uv += sin(uTime*0.1 + uv.y*8.0)*0.002;
-      uv += sin(d*50.0 - uTime*8.0)*0.003;
+      uv += sin(uTime*0.08 + uv.y*6.0)*0.002;
 
-      vec4 c = texture2D(uTexture,uv);
-      vec3 col = c.rgb * 0.9;
-      col = col / (col + vec3(0.5));
+      vec4 c = texture2D(uTexture, uv);
+      vec3 col = c.rgb * 0.92;
+      col = col / (col + vec3(0.55));
 
       gl_FragColor = vec4(col,1.0);
     }
   `
 });
 
-scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), material));
 
-/* 🌫 CLOUD OBJECTS (НАВИГАЦИЯ ВНУТРИ СЦЕНЫ) */
-const objects = [];
+/* CLOUD NODES */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
-function createNode(x,y,id){
+const nodes = [];
+
+function addNode(x,y){
   const geo = new THREE.SphereGeometry(0.03,16,16);
   const mat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
@@ -177,37 +149,31 @@ function createNode(x,y,id){
     opacity:0.9
   });
 
-  const mesh = new THREE.Mesh(geo,mat);
-  mesh.position.set(x,y,0);
-  mesh.userData.id = id;
-
-  scene.add(mesh);
-  objects.push(mesh);
+  const m = new THREE.Mesh(geo,mat);
+  m.position.set(x,y,0);
+  scene.add(m);
+  nodes.push(m);
 }
 
-createNode(-0.3,0.2,"theatre");
-createNode(0.2,-0.1,"theatre");
-createNode(0.4,0.25,"theatre");
+addNode(-0.3,0.2);
+addNode(0.2,-0.1);
+addNode(0.4,0.25);
 
-/* interaction */
-window.addEventListener('mousemove',(e)=>{
-  mouse.x = e.clientX/innerWidth;
-  mouse.y = 1 - e.clientY/innerHeight;
-});
-
+/* CLICK FIX (ВАЖНО) */
 window.addEventListener('click',(e)=>{
-  const x = (e.clientX/innerWidth)*2-1;
-  const y = -(e.clientY/innerHeight)*2+1;
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera({x,y},camera);
-  const hit = raycaster.intersectObjects(objects);
+  raycaster.setFromCamera(mouse, camera);
 
-  if(hit.length){
+  const hits = raycaster.intersectObjects(nodes);
+
+  if(hits.length){
     openPanel();
   }
 });
 
-/* panel */
+/* PANEL */
 const panel = document.getElementById('panel');
 const audio = document.getElementById('audio');
 const btn = document.getElementById('btn');
@@ -219,21 +185,16 @@ function openPanel(){
 btn.onclick = ()=>{
   if(audio.paused){
     audio.play();
-    btn.textContent="PAUSE";
+    btn.textContent = "PAUSE";
   } else {
     audio.pause();
-    btn.textContent="PLAY";
+    btn.textContent = "PLAY";
   }
 };
 
-/* loop */
+/* LOOP */
 function animate(t){
-  mat.uniforms.uTime.value = t*0.001;
-
-  objects.forEach((o,i)=>{
-    o.position.y += Math.sin(t*0.001 + i)*0.0005;
-  });
-
+  material.uniforms.uTime.value = t * 0.001;
   renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
