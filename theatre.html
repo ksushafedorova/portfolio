@@ -14,6 +14,7 @@ html, body {
   background: #000;
 }
 
+/* background canvas */
 canvas {
   position: fixed;
   top: 0;
@@ -21,80 +22,91 @@ canvas {
   z-index: 0;
 }
 
-/* ВАЖНО: НЕ туман, а лёгкое затемнение */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* контент поверх */
+/* layout */
 main {
   position: relative;
   z-index: 2;
-  padding: 120px 60px;
-  max-width: 900px;
-  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+  padding: 120px 40px;
+  box-sizing: border-box;
 }
 
+/* typography */
 h1 {
   font-size: 38px;
   font-weight: normal;
   margin-bottom: 12px;
-  text-align: center;
 }
 
 .subtitle {
-  text-align: center;
   font-size: 16px;
   color: #cfcfcf;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
-/* блок */
-.project {
-  display: flex;
-  gap: 40px;
-  align-items: center;
+.description {
+  max-width: 650px;
+  margin: 0 auto 50px auto;
+  line-height: 1.7;
+  font-size: 15px;
+  color: #bdbdbd;
 }
 
-.project img {
-  width: 320px;
-  height: auto;
+/* hidden hotspot layer (cloud navigation) */
+.hotspot {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  z-index: 3;
+  cursor: pointer;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.0);
+}
+
+/* PANEL */
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -45%) scale(0.92);
+
+  width: 520px;
+  background: rgba(0,0,0,0.72);
+  border: 1px solid rgba(255,255,255,0.12);
+
+  padding: 18px;
+  z-index: 10;
+
   opacity: 0;
-  transform: translateY(25px) scale(0.92);
-  filter: contrast(0.95) saturate(0.9);
-  transition: all 1.2s ease;
+  pointer-events: none;
+
+  transition: 0.8s ease;
+  backdrop-filter: blur(10px);
 }
 
-.project img.visible {
+.panel.open {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
 }
 
-/* текст */
-.right {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 420px;
+.panel img {
+  width: 100%;
+  margin-bottom: 12px;
 }
 
-.text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #cfcfcf;
+.panel .title {
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
-/* кастом кнопка */
-.playBtn {
-  width: 120px;
-  padding: 10px 14px;
-  border: 1px solid rgba(255,255,255,0.4);
+.panel button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid #fff;
   background: transparent;
-  color: #f2f2f2;
+  color: #fff;
   cursor: pointer;
 }
 </style>
@@ -102,45 +114,42 @@ h1 {
 
 <body>
 
-<div class="overlay"></div>
-
 <main>
-
   <h1>Theatre Works</h1>
   <div class="subtitle">Selected compositions for theatre productions</div>
-
-  <div class="project">
-
-    <img src="theatre1.jpg" id="img">
-
-    <div class="right">
-      <div class="text">
-        Children’s theatre production (Kazan). Original music for repertory theatre.
-      </div>
-
-      <button class="playBtn" id="playBtn">PLAY</button>
-    </div>
-
-  </div>
-
+  <div class="description">Click on cloud points in the background.</div>
 </main>
+
+<!-- CLOUD NAVIGATION HIT AREA -->
+<div class="hotspot" data-id="theatre"></div>
+
+<!-- FLOATING PANEL -->
+<div class="panel" id="panel">
+  <img src="theatre1.jpg">
+  <div class="title">Children’s theatre production (Kazan)</div>
+
+  <audio id="audio" src="theatre1.mp3"></audio>
+
+  <button id="playBtn">PLAY</button>
+</div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
+
 const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias:true });
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
-/* ВАЖНО: возвращаем нормальную картинку */
+/* CLOUD TEXTURE */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
 
-/* мышь */
+/* mouse */
 const mouse = new THREE.Vector2(0.5,0.5);
 const prevMouse = new THREE.Vector2(0.5,0.5);
 
@@ -157,7 +166,7 @@ const material = new THREE.ShaderMaterial({
     uTime:{value:0}
   },
 
-  vertexShader:`
+  vertexShader: `
     varying vec2 vUv;
     void main(){
       vUv = uv;
@@ -165,7 +174,7 @@ const material = new THREE.ShaderMaterial({
     }
   `,
 
-  fragmentShader:`
+  fragmentShader: `
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
     uniform vec2 uPrevMouse;
@@ -192,15 +201,15 @@ const material = new THREE.ShaderMaterial({
 
       vec4 c = texture2D(uTexture,uv);
 
-      vec3 col = c.rgb * 0.9;
-      col = col / (col + vec3(0.5));
+      vec3 col = c.rgb * 0.85;
+      col = col / (col + vec3(0.55));
 
       gl_FragColor = vec4(col,1.0);
     }
   `
 });
 
-scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), material));
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
 
 function animate(t){
   material.uniforms.uTime.value = t*0.001;
@@ -210,32 +219,28 @@ function animate(t){
 }
 animate();
 
+/* PANEL LOGIC */
+const panel = document.getElementById('panel');
+const audio = document.getElementById('audio');
+const btn = document.getElementById('playBtn');
+
+document.querySelector('.hotspot').addEventListener('click', ()=>{
+  panel.classList.add('open');
+});
+
+btn.onclick = () => {
+  if(audio.paused){
+    audio.play();
+    btn.textContent = "PAUSE";
+  } else {
+    audio.pause();
+    btn.textContent = "PLAY";
+  }
+};
+
 window.addEventListener('resize',()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
-
-/* image reveal */
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    document.getElementById('img')?.classList.add('visible');
-  },500);
-});
-
-/* audio */
-const audio = new Audio('theatre1.mp3');
-let isPlaying = false;
-
-document.getElementById('playBtn').onclick = ()=>{
-  if(!isPlaying){
-    audio.play();
-    isPlaying = true;
-    playBtn.textContent = "PAUSE";
-  } else {
-    audio.pause();
-    isPlaying = false;
-    playBtn.textContent = "PLAY";
-  }
-};
 </script>
 
 </body>
