@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Theatre Works</title>
+<title>Theatre Works — Ksenia Fedorova</title>
 
 <style>
 html, body {
@@ -14,68 +14,143 @@ html, body {
   color: #f2f2f2;
 }
 
+/* BACKGROUND */
 canvas {
-  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
 }
 
-/* минимальный текст поверх */
-main {
-  position: absolute;
+/* NO HARD OVERLAY (важно) */
+
+/* UI LAYER */
+.ui {
+  position: relative;
   z-index: 2;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+}
+
+/* HEADER */
+header {
+  position: fixed;
+  top: 40px;
+  width: 100%;
   text-align: center;
+  z-index: 3;
   pointer-events: none;
 }
 
 h1 {
+  font-weight: 400;
   font-size: 34px;
-  font-weight: normal;
+  margin: 0;
 }
 
 .subtitle {
   font-size: 14px;
-  opacity: 0.8;
+  opacity: 0.7;
+}
+
+/* CLOUD NAV ZONES (invisible hotspots) */
+.cloudZone {
+  position: fixed;
+  width: 220px;
+  height: 140px;
+  cursor: pointer;
+  z-index: 3;
+}
+
+/* просто "облака-области" */
+#cloud1 { top: 35%; left: 20%; }
+#cloud2 { top: 25%; left: 55%; }
+#cloud3 { top: 60%; left: 70%; }
+
+/* PROJECT PANEL */
+.panel {
+  position: fixed;
+  right: 60px;
+  bottom: 60px;
+  width: 420px;
+
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+
+  padding: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.6s ease;
+
+  z-index: 5;
+}
+
+.panel.open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.panel img {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.panel button {
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.panel button:hover {
+  border-color: white;
 }
 </style>
 </head>
 
 <body>
 
-<main>
+<header>
   <h1>Theatre Works</h1>
-  <div class="subtitle">Selected compositions</div>
-</main>
+  <div class="subtitle">click through clouds</div>
+</header>
+
+<!-- CLOUD HOTSPOTS -->
+<div class="cloudZone" id="cloud1"></div>
+<div class="cloudZone" id="cloud2"></div>
+<div class="cloudZone" id="cloud3"></div>
+
+<!-- PROJECT PANEL -->
+<div class="panel" id="panel">
+  <img id="pImg" src="">
+  <div id="pText"></div>
+  <br>
+  <button id="playBtn">PLAY</button>
+</div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
-
 const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
 const renderer = new THREE.WebGLRenderer({ antialias:true });
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-/* 🎭 BACKGROUND (ВАШИ ОБЛАКА) */
+/* BACKGROUND CLOUDS */
 const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
-texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse */
 const mouse = new THREE.Vector2(0.5,0.5);
 const prevMouse = new THREE.Vector2(0.5,0.5);
 
 window.addEventListener('mousemove', e=>{
-  mouse.x = e.clientX/innerWidth;
-  mouse.y = 1 - e.clientY/innerHeight;
+  mouse.x = e.clientX/window.innerWidth;
+  mouse.y = 1 - e.clientY/window.innerHeight;
 });
 
 const material = new THREE.ShaderMaterial({
-
   uniforms:{
     uTexture:{value:texture},
     uMouse:{value:mouse},
@@ -86,8 +161,8 @@ const material = new THREE.ShaderMaterial({
   vertexShader:`
     varying vec2 vUv;
     void main(){
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+      vUv=uv;
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
     }
   `,
 
@@ -100,39 +175,94 @@ const material = new THREE.ShaderMaterial({
     varying vec2 vUv;
 
     void main(){
-      vec2 uv = vUv;
+      vec2 uv=vUv;
 
-      float d = distance(uv, uMouse);
-      float dp = distance(uv, uPrevMouse);
+      float d=distance(uv,uMouse);
+      float dp=distance(uv,uPrevMouse);
 
-      float ripple =
-        sin(d*55.0 - uTime*10.0)*exp(-d*12.0) +
-        sin(dp*60.0 - uTime*8.0)*exp(-dp*10.0);
+      float ripple=
+        sin(d*55.0-uTime*10.0)*exp(-d*12.0)+
+        sin(dp*60.0-uTime*8.0)*exp(-dp*10.0);
 
       uv += vec2(
-        sin(uTime*0.2 + uv.y*10.0),
-        cos(uTime*0.18 + uv.x*10.0)
-      ) * 0.002;
+        sin(uTime*0.2+uv.y*10.0),
+        cos(uTime*0.18+uv.x*10.0)
+      )*0.002;
 
-      uv += ripple * 0.004;
+      uv += ripple*0.004;
 
-      gl_FragColor = texture2D(uTexture, uv);
+      vec4 c = texture2D(uTexture,uv);
+
+      vec3 col = c.rgb*0.9;
+      col = col/(col+vec3(0.55));
+
+      gl_FragColor = vec4(col,1.0);
     }
   `
 });
 
-scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), material));
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
 
 function animate(t){
-  material.uniforms.uTime.value = t * 0.001;
-  prevMouse.lerp(mouse, 0.08);
-  renderer.render(scene, camera);
+  material.uniforms.uTime.value = t*0.001;
+  prevMouse.lerp(mouse,0.06);
+  renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
 animate();
 
-window.addEventListener('resize', () => {
-  renderer.setSize(innerWidth, innerHeight);
+/* PANEL LOGIC */
+const panel = document.getElementById('panel');
+const img = document.getElementById('pImg');
+const text = document.getElementById('pText');
+
+const audio = new Audio('theatre1.mp3');
+let playing = false;
+
+document.getElementById('playBtn').onclick = ()=>{
+  if(!playing){
+    audio.play();
+    playing = true;
+  } else {
+    audio.pause();
+    playing = false;
+  }
+};
+
+/* CLOUD CONTENT MAP */
+const projects = {
+  cloud1: {
+    img: 'theatre1.jpg',
+    text: 'Children’s theatre production (Kazan). Repertory theatre score.'
+  },
+  cloud2: {
+    img: 'theatre2.jpg',
+    text: 'Experimental stage work with live performers.'
+  },
+  cloud3: {
+    img: 'theatre3.jpg',
+    text: 'Student / research theatre composition.'
+  }
+};
+
+function openProject(id){
+  const p = projects[id];
+  if(!p) return;
+
+  img.src = p.img;
+  text.innerText = p.text;
+
+  panel.classList.add('open');
+}
+
+document.querySelectorAll('.cloudZone').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    openProject(el.id);
+  });
+});
+
+window.addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight);
 });
 </script>
 
