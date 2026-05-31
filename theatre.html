@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Theatre Works — Ksenia Fedorova</title>
+<title>Theatre Works</title>
 
 <style>
 html, body {
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow: hidden;
   font-family: Arial, sans-serif;
   color: #f2f2f2;
   background: #000;
@@ -18,102 +18,59 @@ canvas {
   position: fixed;
   top: 0;
   left: 0;
+  display: block;
   z-index: 0;
 }
 
-/* deep atmosphere */
+/* UI layer */
 .overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0,0,0,0.25),
-    rgba(0,0,0,0.78)
-  );
-  z-index: 1;
+  background: rgba(0,0,0,0.25);
+  z-index: 2;
   pointer-events: none;
 }
 
 main {
-  position: relative;
-  z-index: 2;
-  padding: 120px 60px;
-  max-width: 900px;
-  margin: 0 auto;
+  position: absolute;
+  z-index: 3;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 
-/* header */
 h1 {
   font-size: 38px;
   font-weight: normal;
   margin-bottom: 12px;
-  text-align: center;
 }
 
 .subtitle {
-  text-align: center;
   font-size: 16px;
-  color: #cfcfcf;
-  margin-bottom: 40px;
+  color: #d9d9d9;
+  margin-bottom: 34px;
 }
 
-/* PROJECT BLOCK */
-.project {
-  display: flex;
-  gap: 40px;
-  align-items: center;
-}
-
-/* IMAGE (left floating object) */
-.project img {
-  width: 320px;
-  height: auto;
-
-  opacity: 0;
-  transform: translateY(25px) scale(0.92);
-  filter: contrast(0.9) saturate(0.85) blur(1px);
-
-  transition: all 1.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.project img.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: none;
-}
-
-/* RIGHT SIDE */
-.right {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* BUTTON (no native player) */
-.playBtn {
-  width: 120px;
-  padding: 10px 14px;
-
-  border: 1px solid rgba(255,255,255,0.4);
-  background: transparent;
-  color: #f2f2f2;
-
+/* clickable hint */
+.hotspot {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.6);
   cursor: pointer;
-  letter-spacing: 2px;
-
-  transition: 0.3s ease;
+  z-index: 4;
+  transform: translate(-50%, -50%);
 }
 
-.playBtn:hover {
-  border-color: #fff;
-  transform: translateY(-2px);
-}
-
-.text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #cfcfcf;
-  max-width: 420px;
+.hotspot::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 </style>
 </head>
@@ -123,49 +80,37 @@ h1 {
 <div class="overlay"></div>
 
 <main>
-
   <h1>Theatre Works</h1>
-  <div class="subtitle">Selected compositions for theatre productions</div>
-
-  <div class="project">
-
-    <!-- LEFT -->
-    <img src="theatre1.jpg" id="img">
-
-    <!-- RIGHT -->
-    <div class="right">
-
-      <div class="text">
-        Children’s theatre production (Kazan). Original music for repertory theatre.
-      </div>
-
-      <button class="playBtn" id="playBtn">PLAY</button>
-
-    </div>
-
-  </div>
+  <div class="subtitle">click in the space</div>
 </main>
+
+<!-- hotspot on "cloud area" -->
+<div class="hotspot" id="theatreSpot" style="left:60%; top:45%;"></div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
+
 const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 document.body.appendChild(renderer.domElement);
 
-const texture = new THREE.TextureLoader().load('clouds_theatre.jpg');
+/* ORIGINAL-STYLE TEXTURE (NO TINT CHANGE) */
+const texture = new THREE.TextureLoader().load('clouds.jpg');
+texture.colorSpace = THREE.SRGBColorSpace;
 
+/* mouse */
 const mouse = new THREE.Vector2(0.5,0.5);
 const prevMouse = new THREE.Vector2(0.5,0.5);
 
 window.addEventListener('mousemove', e=>{
-  mouse.x = e.clientX/window.innerWidth;
-  mouse.y = 1 - e.clientY/window.innerHeight;
+  mouse.x = e.clientX/innerWidth;
+  mouse.y = 1 - e.clientY/innerHeight;
 });
 
 const material = new THREE.ShaderMaterial({
@@ -175,6 +120,7 @@ const material = new THREE.ShaderMaterial({
     uPrevMouse:{value:prevMouse},
     uTime:{value:0}
   },
+
   vertexShader:`
     varying vec2 vUv;
     void main(){
@@ -182,6 +128,7 @@ const material = new THREE.ShaderMaterial({
       gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
     }
   `,
+
   fragmentShader:`
     uniform sampler2D uTexture;
     uniform vec2 uMouse;
@@ -196,22 +143,20 @@ const material = new THREE.ShaderMaterial({
       float d=distance(uv,uMouse);
       float dp=distance(uv,uPrevMouse);
 
-      float ripple=sin(d*55.0-uTime*10.0)*exp(-d*12.0)
-                  +sin(dp*60.0-uTime*8.0)*exp(-dp*10.0);
+      float ripple =
+        sin(d*55.0-uTime*10.0)*exp(-d*12.0) +
+        sin(dp*60.0-uTime*8.0)*exp(-dp*10.0);
 
-      uv+=vec2(
+      uv += vec2(
         sin(uTime*0.2+uv.y*10.0),
         cos(uTime*0.18+uv.x*10.0)
       )*0.002;
 
-      uv+=ripple*0.004;
+      uv += ripple*0.004;
 
       vec4 c=texture2D(uTexture,uv);
 
-      vec3 col=c.rgb*0.85;
-      col=col/(col+vec3(0.55));
-
-      gl_FragColor=vec4(col,1.0);
+      gl_FragColor=c;
     }
   `
 });
@@ -220,38 +165,20 @@ scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));
 
 function animate(t){
   material.uniforms.uTime.value=t*0.001;
-  prevMouse.lerp(mouse,0.06); // ← smoother than before
+  prevMouse.lerp(mouse,0.08);
   renderer.render(scene,camera);
   requestAnimationFrame(animate);
 }
 animate();
 
-/* image reveal */
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    document.getElementById('img')?.classList.add('visible');
-  },500);
-});
-
-/* audio control */
-const audio = new Audio('theatre1.mp3');
-let isPlaying = false;
-
-document.getElementById('playBtn').onclick = ()=>{
-  if(!isPlaying){
-    audio.play();
-    isPlaying=true;
-    playBtn.textContent="PAUSE";
-  } else {
-    audio.pause();
-    isPlaying=false;
-    playBtn.textContent="PLAY";
-  }
-};
-
 window.addEventListener('resize',()=>{
   renderer.setSize(innerWidth,innerHeight);
 });
+
+/* CLICK HOTSPOT */
+document.getElementById("theatreSpot").onclick = () => {
+  alert("THEATRE TRACE opens here (next step we will load module)");
+};
 </script>
 
 </body>
