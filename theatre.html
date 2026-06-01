@@ -5,6 +5,24 @@
 <title>Theatre Works — Ksenia Fedorova</title>
 
 <style>
+  .cloudNode {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 0 12px rgba(255,255,255,0.4);
+
+  z-index: 5;
+  cursor: pointer;
+
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.cloudNode:hover {
+  transform: scale(1.6);
+  opacity: 1;
+}
 html, body {
   margin: 0;
   padding: 0;
