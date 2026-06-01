@@ -297,14 +297,46 @@ audio {
   opacity: 0.7;
   pointer-events: auto;
 }
+ .nav {
+  position: fixed;
+  top: 45%;
+  left: 0;
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 40px;
+
+  z-index: 6;
+  pointer-events: none;
+}
+
+.navLeft, .navOpen {
+  pointer-events: auto;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  transition: 0.3s ease;
+}
+
+.navLeft:hover,
+.navOpen:hover {
+  color: rgba(255,255,255,1);
+  transform: scale(1.2);
+}
 </style>
 </head>
 
 <body>
 
 <div class="overlay"></div>
+  <div class="nav">
+  <div class="navLeft">←</div>
+  <div class="navOpen">→</div>
   <div class="cloudNode" id="theatreNode"></div>
-
+</div>
 <main>
 
   <h1>Theatre Works</h1>
@@ -370,11 +402,40 @@ const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
   let isOpened = false;
 const node = document.getElementById('theatreNode');
+const navLeft = document.querySelector('.navLeft');
+const navOpen = document.querySelector('.navOpen');
 const img = document.getElementById('theatreImg');
 const right = document.querySelector('.right');
 const btn = document.getElementById('playBtn');
 const audio = document.getElementById('theatreAudio');
+const progress = document.getElementById('progress'); 
+navOpen.addEventListener('click', (e) => {
+  e.stopPropagation();
 
+  if (isOpened) return;
+  isOpened = true;
+
+  node.classList.add('hide');
+
+  img?.classList.add('visible');
+  right?.classList.add('show');
+  btn?.classList.add('show');
+  document.getElementById('progress')?.classList.add('show');
+
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play();
+  }
+
+  if (btn) {
+    btn.textContent = "PAUSE";
+  }
+});
+  navLeft.addEventListener('click', (e) => {
+  e.stopPropagation();
+  window.location.href = "index.html";
+});
+  
 let isPlaying = false;
   
 window.addEventListener('mousemove', (e) => {
@@ -462,27 +523,6 @@ placeNode();
 
 window.addEventListener('resize', placeNode);
 
-node.addEventListener('click', () => {
-
-  if (isOpened) return;
-  isOpened = true;
-
-  node.classList.add('hide');
-
-  img?.classList.add('visible');
-  right?.classList.add('show');
-  btn?.classList.add('show');
-  document.getElementById('progress')?.classList.add('show');
-
-  if (audio) {
-    audio.currentTime = 0;
-    audio.play();
-  }
-
-  if (btn) {
-    btn.textContent = "PAUSE";
-  }
-});
 btn.addEventListener('click', (e) => {
   e.stopPropagation();
 
@@ -499,24 +539,28 @@ btn.addEventListener('click', (e) => {
     btn.textContent = "PLAY";
   }
 });
-  const progress = document.getElementById('progress');
+  
+if (audio && progress) {
+  audio.addEventListener('timeupdate', () => {
 
-audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
 
-  if (!audio.duration) return;
+    progress.value =
+      (audio.currentTime / audio.duration) * 100;
+  });
+}
 
-  progress.value =
-    (audio.currentTime / audio.duration) * 100;
-});
+if (progress && audio) {
+  progress.addEventListener('input', () => {
 
-progress.addEventListener('input', () => {
+    if (!audio.duration) return;
 
-  if (!audio.duration) return;
+    audio.currentTime =
+      (progress.value / 100) * audio.duration;
 
-  audio.currentTime =
-    (progress.value / 100) * audio.duration;
-  progress.style.setProperty('--progress', progress.value + '%');
-});
+    progress.style.setProperty('--progress', progress.value + '%');
+  });
+}
   
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
