@@ -168,6 +168,25 @@ audio {
   pointer-events: auto;
   transform: translateY(0);
 }
+  .project {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+#theatreImg {
+  width: 320px;
+  max-width: 40%;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 120px;
+}
 </style>
 </head>
 
@@ -200,7 +219,9 @@ audio {
   <img src="theatre1.jpg" id="theatreImg">
 
   <div class="right">
+
     <button id="playBtn" class="playBtn">PAUSE</button>
+
   </div>
 
 </div>
