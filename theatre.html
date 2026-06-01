@@ -30,6 +30,11 @@
 .cloudNode:hover {
   transform: scale(1.8);
   opacity: 1;
+} 
+  .cloudNode.hide {
+  opacity: 0;
+  transform: scale(0.2);
+  pointer-events: none;
 }
 html, body {
   margin: 0;
@@ -294,12 +299,18 @@ placeNode();
 window.addEventListener('resize', placeNode);
 
 node.addEventListener('click', () => {
-  const audio = document.querySelector('audio');
 
+  node.classList.add('hide');
+
+  const img = document.getElementById('theatreImg');
+  if (img) img.classList.add('visible');
+
+  const audio = document.querySelector('audio');
   if (audio) {
     audio.currentTime = 0;
     audio.play();
   }
+
 });
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
