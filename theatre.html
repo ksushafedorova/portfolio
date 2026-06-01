@@ -398,51 +398,51 @@ node.addEventListener('click', () => {
 
   const img = document.getElementById('theatreImg');
   if (img) img.classList.add('visible');
-  
-const btn = document.getElementById('playBtn');
-if (btn) btn.classList.add('show');
-  
+
+  const right = document.querySelector('.right');
+  if (right) right.classList.add('show');
+
+  const btn = document.getElementById('playBtn');
   const audio = document.getElementById('theatreAudio');
 
+  // показываем UI
+  if (btn) {
+    btn.classList.add('show');
+    btn.textContent = "PAUSE";
+  }
+
+  // старт аудио
   if (audio) {
     audio.currentTime = 0;
     audio.play();
   }
 
 });
-  const audio = document.getElementById('theatreAudio');
-const btn = document.getElementById('playBtn');
-
-let isPlaying = false;
-
 btn.addEventListener('click', (e) => {
   e.stopPropagation();
 
   if (!audio) return;
 
-  if (isPlaying) {
-    audio.pause();
-    btn.textContent = "PLAY";
-  } else {
+  if (audio.paused) {
     audio.play();
     btn.textContent = "PAUSE";
+  } else {
+    audio.pause();
+    btn.textContent = "PLAY";
   }
-
-  isPlaying = !isPlaying;
 });
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-  document.querySelectorAll('.track').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const src = btn.dataset.src;
+ document.querySelectorAll('.track').forEach(trackBtn => {
+  trackBtn.addEventListener('click', () => {
+    const src = trackBtn.dataset.src;
 
     audio.src = src;
     audio.currentTime = 0;
     audio.play();
 
-    btn.textContent = btn.textContent + " ●";
-    isPlaying = true;
+    playBtn.textContent = "PAUSE";
   });
 });
 </script>
