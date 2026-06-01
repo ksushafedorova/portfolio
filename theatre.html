@@ -542,26 +542,24 @@ progress.addEventListener('input', () => {
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+console.log("JS START OK");
+
 document.querySelectorAll('.track').forEach(trackBtn => {
   trackBtn.addEventListener('click', () => {
-    progress.value = 0;
-    progress.style.setProperty('--progress', '0%');
+    console.log("track click");
 
-    const src = trackBtn.dataset.src;
+    if (!audio) return;
 
-    audio.src = src;
+    audio.src = trackBtn.dataset.src;
     audio.currentTime = 0;
     audio.play();
-
-    isPlaying = true;
-    if (btn) btn.textContent = "PAUSE";
   });
-}); // ← ВОТ ЭТО закрывает forEach
+});
 
-// отдельно — НЕ ВНУТРИ forEach
 const navBack = document.querySelector('.navBack');
 
 navBack?.addEventListener('click', () => {
+  console.log("navBack click");
   window.location.href = "index.html";
 });
 </script>
