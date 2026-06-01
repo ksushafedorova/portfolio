@@ -172,14 +172,15 @@ audio {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px; /* было 30 → уменьшаем */
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 #theatreImg {
   width: 280px;
   max-width: 40%;
 }
-
 .right {
   display: flex;
   flex-direction: column;
@@ -188,7 +189,7 @@ audio {
 
   gap: 8px;
 
-  min-width: 0;
+  width: 160px;   /* 👈 ВАЖНО: фиксируем колонку */
 }
   .trackTitle {
   font-size: 12px;
@@ -216,6 +217,18 @@ audio {
 .track:hover {
   opacity: 1;
   border-color: white;
+}
+  .right {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: 0.8s ease;
+}
+
+.right.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 </style>
 </head>
