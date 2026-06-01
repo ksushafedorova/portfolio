@@ -205,6 +205,7 @@ texture.colorSpace = THREE.SRGBColorSpace;
 /* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
+  let isOpened = false;
 
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
@@ -299,6 +300,9 @@ placeNode();
 window.addEventListener('resize', placeNode);
 
 node.addEventListener('click', () => {
+
+  if (isOpened) return;
+  isOpened = true;
 
   node.classList.add('hide');
 
