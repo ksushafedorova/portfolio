@@ -175,8 +175,8 @@ audio {
   .project {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 18px;
+  justify-content: flex-start;
+  gap: 10px;
   max-width: 900px;
   margin: 0 auto;
 }
@@ -193,7 +193,8 @@ audio {
 
   gap: 8px;
 
-  width: 160px;   /* 👈 ВАЖНО: фиксируем колонку */
+  width: auto;
+  min-width: 120px;
 }
   .trackTitle {
   font-size: 12px;
