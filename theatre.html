@@ -493,6 +493,9 @@ btn.addEventListener('click', (e) => {
     btn.textContent = "PAUSE";
   } else {
     audio.pause();
+    progress.value = 0;
+    progress.style.setProperty('--progress', '0%');
+
     btn.textContent = "PLAY";
   }
 });
