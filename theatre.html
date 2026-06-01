@@ -157,6 +157,18 @@ audio {
   cursor: pointer;
   letter-spacing: 2px;
 }
+  .playBtn {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: 0.8s ease;
+}
+
+.playBtn.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
 </style>
 </head>
 
@@ -315,7 +327,10 @@ node.addEventListener('click', () => {
 
   const img = document.getElementById('theatreImg');
   if (img) img.classList.add('visible');
-
+  
+const btn = document.getElementById('playBtn');
+if (btn) btn.classList.add('show');
+  
   const audio = document.getElementById('theatreAudio');
 
   if (audio) {
