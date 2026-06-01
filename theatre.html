@@ -235,6 +235,21 @@ audio {
   pointer-events: auto;
   transform: translateY(0);
 }
+  #progress {
+  width: 140px;
+  margin-top: 6px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+  #progress {
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.8s ease;
+}
+  #progress.show {
+  opacity: 0.7;
+  pointer-events: auto;
+}
 </style>
 </head>
 
@@ -271,6 +286,7 @@ audio {
   <div class="trackTitle">excerpt 01</div>
 
   <button id="playBtn" class="playBtn">PLAY</button>
+    <input type="range" id="progress" value="0" min="0" max="100">
 
   <div class="trackList">
     <button class="track" data-src="excerpt1.mp3">01</button>
@@ -431,6 +447,23 @@ btn.addEventListener('click', (e) => {
     audio.pause();
     btn.textContent = "PLAY";
   }
+});
+  const progress = document.getElementById('progress');
+
+audio.addEventListener('timeupdate', () => {
+
+  if (!audio.duration) return;
+
+  progress.value =
+    (audio.currentTime / audio.duration) * 100;
+});
+
+progress.addEventListener('input', () => {
+
+  if (!audio.duration) return;
+
+  audio.currentTime =
+    (progress.value / 100) * audio.duration;
 });
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
