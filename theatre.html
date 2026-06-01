@@ -297,6 +297,24 @@ audio {
   opacity: 0.7;
   pointer-events: auto;
 }
+  .navInline {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* или left если хочешь левее текста */
+  margin: 10px 0;
+}
+
+.navBack {
+  cursor: pointer;
+  font-size: 18px;
+  color: rgba(255,255,255,0.7);
+  transition: 0.3s ease;
+}
+
+.navBack:hover {
+  color: rgba(255,255,255,1);
+  transform: scale(1.2);
+}
 </style>
 </head>
 
@@ -316,7 +334,9 @@ audio {
   <div class="description">
     Original music for theatre projects, productions and studies.
   </div>
-
+<div class="navInline">
+  <span class="navBack">←</span>
+</div>
   <div class="spacer"></div>
 
   <h2>Children’s theatre production (Kazan)</h2>
@@ -374,7 +394,7 @@ const img = document.getElementById('theatreImg');
 const right = document.querySelector('.right');
 const btn = document.getElementById('playBtn');
 const audio = document.getElementById('theatreAudio');
-
+const navBack = document.querySelector('.navBack');
 let isPlaying = false;
   
 window.addEventListener('mousemove', (e) => {
@@ -524,7 +544,7 @@ window.addEventListener('resize', () => {
 document.querySelectorAll('.track').forEach(trackBtn => {
   trackBtn.addEventListener('click', () => {
     progress.value = 0;
-progress.style.setProperty('--progress', '0%');
+    progress.style.setProperty('--progress', '0%');
 
     const src = trackBtn.dataset.src;
 
@@ -535,6 +555,12 @@ progress.style.setProperty('--progress', '0%');
     isPlaying = true;
     if (btn) btn.textContent = "PAUSE";
   });
+});
+
+const navBack = document.querySelector('.navBack');
+
+navBack?.addEventListener('click', () => {
+  window.location.href = "index.html";
 });
 </script>
 
