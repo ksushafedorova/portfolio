@@ -253,8 +253,17 @@ audio {
 /* сама дорожка */
 #progress::-webkit-slider-runnable-track {
   height: 2px;
-  background: rgba(255,255,255,0.35);
   border-radius: 2px;
+
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0.9) 0%,
+    rgba(255,255,255,0.9) var(--progress, 0%),
+    rgba(255,255,255,0.2) var(--progress, 0%),
+    rgba(255,255,255,0.2) 100%
+  );
+
+  box-shadow: 0 0 6px rgba(255,255,255,0.15);
 }
 
 /* бегунок (точка) */
@@ -503,7 +512,9 @@ progress.addEventListener('input', () => {
 
   audio.currentTime =
     (progress.value / 100) * audio.duration;
+  progress.style.setProperty('--progress', progress.value + '%');
 });
+  
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
