@@ -305,7 +305,14 @@ texture.colorSpace = THREE.SRGBColorSpace;
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
   let isOpened = false;
+const node = document.getElementById('theatreNode');
+const img = document.getElementById('theatreImg');
+const right = document.querySelector('.right');
+const btn = document.getElementById('playBtn');
+const audio = document.getElementById('theatreAudio');
 
+let isPlaying = false;
+  
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
   mouse.y = 1.0 - e.clientY / window.innerHeight;
@@ -382,8 +389,6 @@ animate();
 
 /* ✨ emergence trigger */
 
-const node = document.getElementById('theatreNode');
-
 function placeNode() {
   node.style.left = (window.innerWidth * 0.62) + 'px';
   node.style.top = (window.innerHeight * 0.45) + 'px';
@@ -400,27 +405,18 @@ node.addEventListener('click', () => {
 
   node.classList.add('hide');
 
-  const img = document.getElementById('theatreImg');
-  if (img) img.classList.add('visible');
+  img?.classList.add('visible');
+  right?.classList.add('show');
+  btn?.classList.add('show');
 
-  const right = document.querySelector('.right');
-  if (right) right.classList.add('show');
-
-  const btn = document.getElementById('playBtn');
-  const audio = document.getElementById('theatreAudio');
-
-  // показываем UI
-  if (btn) {
-    btn.classList.add('show');
-    btn.textContent = "PAUSE";
-  }
-
-  // старт аудио
   if (audio) {
     audio.currentTime = 0;
     audio.play();
   }
 
+  if (btn) {
+    btn.textContent = "PAUSE";
+  }
 });
 btn.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -438,15 +434,17 @@ btn.addEventListener('click', (e) => {
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
- document.querySelectorAll('.track').forEach(trackBtn => {
+document.querySelectorAll('.track').forEach(trackBtn => {
   trackBtn.addEventListener('click', () => {
+
     const src = trackBtn.dataset.src;
 
     audio.src = src;
     audio.currentTime = 0;
     audio.play();
 
-    playBtn.textContent = "PAUSE";
+    isPlaying = true;
+    if (btn) btn.textContent = "PAUSE";
   });
 });
 </script>
