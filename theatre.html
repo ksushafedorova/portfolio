@@ -240,11 +240,48 @@ audio {
   margin-top: 6px;
   cursor: pointer;
 
-  accent-color: rgba(255,255,255,0.85);
+  -webkit-appearance: none;
+  appearance: none;
+
+  background: transparent;
 
   opacity: 0;
   pointer-events: none;
   transition: 0.8s ease;
+}
+
+/* сама дорожка */
+#progress::-webkit-slider-runnable-track {
+  height: 2px;
+  background: rgba(255,255,255,0.35);
+  border-radius: 2px;
+}
+
+/* бегунок (точка) */
+#progress::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+
+  margin-top: -4px;
+}
+
+/* Firefox (на всякий) */
+#progress::-moz-range-track {
+  height: 2px;
+  background: rgba(255,255,255,0.35);
+}
+
+#progress::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  border: none;
 }
 
 #progress.show {
