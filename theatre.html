@@ -395,6 +395,7 @@ const right = document.querySelector('.right');
 const btn = document.getElementById('playBtn');
 const audio = document.getElementById('theatreAudio');
 const navBack = document.querySelector('.navBack');
+  const progress = document.getElementById('progress');
 let isPlaying = false;
   
 window.addEventListener('mousemove', (e) => {
@@ -519,7 +520,7 @@ btn.addEventListener('click', (e) => {
     btn.textContent = "PLAY";
   }
 });
-  const progress = document.getElementById('progress');
+ 
 
 audio.addEventListener('timeupdate', () => {
 
