@@ -520,6 +520,8 @@ window.addEventListener('resize', () => {
 });
 document.querySelectorAll('.track').forEach(trackBtn => {
   trackBtn.addEventListener('click', () => {
+    progress.value = 0;
+progress.style.setProperty('--progress', '0%');
 
     const src = trackBtn.dataset.src;
 
