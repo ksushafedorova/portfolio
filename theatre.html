@@ -282,12 +282,7 @@ function animate(t){
 animate();
 
 /* ✨ emergence trigger */
-window.addEventListener('load', () => {
-  const img = document.getElementById('theatreImg');
-  setTimeout(() => {
-    if (img) img.classList.add('visible');
-  }, 300);
-});
+
 const node = document.getElementById('theatreNode');
 
 function placeNode() {
@@ -304,8 +299,10 @@ node.addEventListener('click', () => {
   if (isOpened) return;
   isOpened = true;
 
+  // убираем точку
   node.classList.add('hide');
 
+  // показываем контент ТОЛЬКО здесь
   const img = document.getElementById('theatreImg');
   if (img) img.classList.add('visible');
 
