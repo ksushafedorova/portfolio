@@ -172,11 +172,11 @@ audio {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 16px; /* было 30 → уменьшаем */
 }
 
 #theatreImg {
-  width: 320px;
+  width: 280px;
   max-width: 40%;
 }
 
@@ -184,8 +184,38 @@ audio {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  min-width: 120px;
+  justify-content: center;
+
+  gap: 8px;
+
+  min-width: 0;
+}
+  .trackTitle {
+  font-size: 12px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+.trackList {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.track {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  font-size: 12px;
+  padding: 4px 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: 0.3s ease;
+}
+
+.track:hover {
+  opacity: 1;
+  border-color: white;
 }
 </style>
 </head>
@@ -220,8 +250,14 @@ audio {
 
   <div class="right">
 
-    <button id="playBtn" class="playBtn">PAUSE</button>
+  <div class="trackTitle">excerpt 01</div>
 
+  <button id="playBtn" class="playBtn">PLAY</button>
+
+  <div class="trackList">
+    <button class="track" data-src="excerpt1.mp3">01</button>
+    <button class="track" data-src="excerpt2.mp3">02</button>
+    <button class="track" data-src="excerpt3.mp3">03</button>
   </div>
 
 </div>
@@ -364,7 +400,7 @@ if (btn) btn.classList.add('show');
   const audio = document.getElementById('theatreAudio');
 const btn = document.getElementById('playBtn');
 
-let isPlaying = true;
+let isPlaying = false;
 
 btn.addEventListener('click', (e) => {
   e.stopPropagation();
@@ -383,6 +419,18 @@ btn.addEventListener('click', (e) => {
 });
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
+});
+  document.querySelectorAll('.track').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const src = btn.dataset.src;
+
+    audio.src = src;
+    audio.currentTime = 0;
+    audio.play();
+
+    btn.textContent = btn.textContent + " ●";
+    isPlaying = true;
+  });
 });
 </script>
 
