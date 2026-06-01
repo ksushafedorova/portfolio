@@ -172,7 +172,7 @@ audio {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px; /* было 30 → уменьшаем */
+  gap: 16px;
 }
 
 #theatreImg {
@@ -185,10 +185,6 @@ audio {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-
-  gap: 8px;
-
-  min-width: 0;
 }
   .trackTitle {
   font-size: 12px;
@@ -216,6 +212,23 @@ audio {
 .track:hover {
   opacity: 1;
   border-color: white;
+}.right,
+.trackTitle,
+.trackList,
+.playBtn {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: 0.8s ease;
+}
+
+.right.show,
+.trackTitle.show,
+.trackList.show,
+.playBtn.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 </style>
 </head>
@@ -376,6 +389,16 @@ placeNode();
 
 window.addEventListener('resize', placeNode);
 
+const node = document.getElementById('theatreNode');
+
+const img = document.getElementById('theatreImg');
+const audio = document.getElementById('theatreAudio');
+const playBtn = document.getElementById('playBtn');
+
+let isOpened = false;
+let isPlaying = false;
+
+/* открыть сцену по облаку */
 node.addEventListener('click', () => {
 
   if (isOpened) return;
@@ -383,54 +406,55 @@ node.addEventListener('click', () => {
 
   node.classList.add('hide');
 
-  const img = document.getElementById('theatreImg');
-  if (img) img.classList.add('visible');
-  
-const btn = document.getElementById('playBtn');
-if (btn) btn.classList.add('show');
-  
-  const audio = document.getElementById('theatreAudio');
+  // показать UI
+  img?.classList.add('visible');
+  document.querySelector('.right')?.classList.add('show');
+  document.querySelector('.trackList')?.classList.add('show');
+  document.querySelector('.trackTitle')?.classList.add('show');
+  playBtn?.classList.add('show');
 
-  if (audio) {
-    audio.currentTime = 0;
-    audio.play();
-  }
+  // старт аудио
+  audio.currentTime = 0;
+  audio.play();
 
+  isPlaying = true;
+  playBtn.textContent = "PAUSE";
 });
-  const audio = document.getElementById('theatreAudio');
-const btn = document.getElementById('playBtn');
 
-let isPlaying = false;
-
-btn.addEventListener('click', (e) => {
+/* play/pause */
+playBtn.addEventListener('click', (e) => {
   e.stopPropagation();
 
   if (!audio) return;
 
-  if (isPlaying) {
-    audio.pause();
-    btn.textContent = "PLAY";
-  } else {
+  if (audio.paused) {
     audio.play();
-    btn.textContent = "PAUSE";
+    playBtn.textContent = "PAUSE";
+    isPlaying = true;
+  } else {
+    audio.pause();
+    playBtn.textContent = "PLAY";
+    isPlaying = false;
   }
+});
 
-  isPlaying = !isPlaying;
-});
-window.addEventListener('resize', () => {
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-  document.querySelectorAll('.track').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const src = btn.dataset.src;
+/* переключение треков */
+document.querySelectorAll('.track').forEach(track => {
+  track.addEventListener('click', () => {
+    const src = track.dataset.src;
 
     audio.src = src;
     audio.currentTime = 0;
     audio.play();
 
-    btn.textContent = btn.textContent + " ●";
+    playBtn.textContent = "PAUSE";
     isPlaying = true;
   });
+});
+
+/* resize */
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 
