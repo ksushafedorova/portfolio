@@ -142,6 +142,7 @@ audio {
 <body>
 
 <div class="overlay"></div>
+  <div class="cloudNode" id="theatreNode"></div>
 
 <main>
 
@@ -273,7 +274,25 @@ window.addEventListener('load', () => {
     if (img) img.classList.add('visible');
   }, 300);
 });
+const node = document.getElementById('theatreNode');
 
+function placeNode() {
+  node.style.left = (window.innerWidth * 0.62) + 'px';
+  node.style.top = (window.innerHeight * 0.45) + 'px';
+}
+
+placeNode();
+
+window.addEventListener('resize', placeNode);
+
+node.addEventListener('click', () => {
+  const audio = document.querySelector('audio');
+
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play();
+  }
+});
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
