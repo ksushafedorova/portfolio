@@ -556,14 +556,14 @@ document.querySelectorAll('.track').forEach(trackBtn => {
     isPlaying = true;
     if (btn) btn.textContent = "PAUSE";
   });
+}); // ← ВОТ ЭТО закрывает forEach
 
-
+// отдельно — НЕ ВНУТРИ forEach
 const navBack = document.querySelector('.navBack');
 
 navBack?.addEventListener('click', () => {
   window.location.href = "index.html";
 });
-  });
 </script>
 
 </body>
