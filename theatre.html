@@ -176,9 +176,10 @@ audio {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 18px;
   margin: 0 auto;
   transform: translateX(-30px);
+  flex-wrap: nowrap;
 }
 #theatreImg {
   width: 280px;
@@ -192,8 +193,7 @@ audio {
 
   gap: 8px;
 
-  width: 140px;
-  flex-shrink: 0;
+  flex: 0 0 auto;   /* 👈 ВАЖНО */
 }
   .trackTitle {
   font-size: 12px;
