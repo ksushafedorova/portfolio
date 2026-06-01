@@ -339,6 +339,26 @@ if (btn) btn.classList.add('show');
   }
 
 });
+  const audio = document.getElementById('theatreAudio');
+const btn = document.getElementById('playBtn');
+
+let isPlaying = true;
+
+btn.addEventListener('click', (e) => {
+  e.stopPropagation();
+
+  if (!audio) return;
+
+  if (isPlaying) {
+    audio.pause();
+    btn.textContent = "PLAY";
+  } else {
+    audio.play();
+    btn.textContent = "PAUSE";
+  }
+
+  isPlaying = !isPlaying;
+});
 window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
