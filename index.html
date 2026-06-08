@@ -164,9 +164,9 @@ const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setClearColor(0x000000, 1);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const texture = new THREE.TextureLoader().load('clouds.jpg');
@@ -247,8 +247,20 @@ const material = new THREE.ShaderMaterial({
   `
 });
 
-const plane = new THREE.Mesh(geometry, material);
-scene.add(plane);
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+function resize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  renderer.setSize(w, h, false);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', resize);
+resize();
 
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
@@ -258,10 +270,4 @@ function animate(time) {
 }
 
 animate();
-
-/* resize ONLY renderer (важно) */
-window.addEventListener('resize', () => {
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
 </script>
