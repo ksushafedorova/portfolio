@@ -259,13 +259,6 @@ animate();
 function onResize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const aspect = w / h;
-
-  camera.left = -aspect;
-  camera.right = aspect;
-  camera.top = 1;
-  camera.bottom = -1;
-  camera.updateProjectionMatrix();
 
   renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
