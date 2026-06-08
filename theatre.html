@@ -457,17 +457,20 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      vec3 c = color.rgb;
+      vec4 color = texture2D(uTexture, uv);
+vec3 c = color.rgb;
 
+/* 1. лёгкий тёплый баланс ДО компрессии */
+c.r *= 1.02;
+c.b *= 0.98;
+
+/* 2. твоя текущая экспозиция */
 c *= 0.9;
+
+/* 3. tonemapping */
 c = c / (c + vec3(0.5));
 
-c.r *= 1.03;
-c.b *= 0.97;
-
 gl_FragColor = vec4(c,1.0);
-  `
-});
 
 scene.add(new THREE.Mesh(geometry, material));
 
