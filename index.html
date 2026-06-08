@@ -162,10 +162,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.mod
 
 const scene = new THREE.Scene();
 
+/* FIXED ORTHO CAMERA (fullscreen UV workflow) */
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true
+});
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
@@ -173,7 +178,7 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + memory */
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
@@ -182,6 +187,7 @@ window.addEventListener('mousemove', (e) => {
   mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
 
+/* geometry */
 const geometry = new THREE.PlaneGeometry(2, 2);
 
 const material = new THREE.ShaderMaterial({
@@ -236,15 +242,12 @@ const material = new THREE.ShaderMaterial({
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      color.rgb = c;
-
-      gl_FragColor = color;
+      gl_FragColor = vec4(c, 1.0);
     }
   `
 });
 
-const plane = new THREE.Mesh(geometry, material);
-scene.add(plane);
+scene.add(new THREE.Mesh(geometry, material));
 
 function animate(time) {
   material.uniforms.uTime.value = time * 0.001;
@@ -255,24 +258,13 @@ function animate(time) {
 
 animate();
 
-/* FIX: responsive resize for proper aspect */
+/* SIMPLE RESIZE (ВАЖНО: без camera math) */
 function onResize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const aspect = w / h;
-
-  camera.left = -aspect;
-  camera.right = aspect;
-  camera.top = 1;
-  camera.bottom = -1;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(w, h);
+  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 }
 
 window.addEventListener('resize', onResize);
-onResize();
 
 </script>
 
