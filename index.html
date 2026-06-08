@@ -188,11 +188,12 @@ const geometry = new THREE.PlaneGeometry(2, 2);
 const material = new THREE.ShaderMaterial({
 
   uniforms: {
-    uTexture: { value: texture },
-    uMouse: { value: mouse },
-    uPrevMouse: { value: prevMouse },
-    uTime: { value: 0 }
-  },
+  uTexture: { value: texture },
+  uMouse: { value: mouse },
+  uPrevMouse: { value: prevMouse },
+  uTime: { value: 0 },
+  uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+}
 
   vertexShader: `
     varying vec2 vUv;
@@ -207,12 +208,21 @@ const material = new THREE.ShaderMaterial({
     uniform vec2 uMouse;
     uniform vec2 uPrevMouse;
     uniform float uTime;
-
+uniform vec2 uResolution;
     varying vec2 vUv;
 
     void main() {
 
-      vec2 uv = vUv;
+     vec2 uv = vUv;
+
+float aspect = uResolution.x / uResolution.y;
+float imageAspect = 1.0;
+
+if (aspect > imageAspect) {
+  uv.x = (uv.x - 0.5) * aspect + 0.5;
+} else {
+  uv.y = (uv.y - 0.5) / aspect + 0.5;
+}
 
       float d = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
@@ -263,6 +273,8 @@ function onResize() {
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(w, h, false);
+
+  material.uniforms.uResolution.value.set(w, h);
 }
 
 </script>
