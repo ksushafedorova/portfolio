@@ -57,12 +57,13 @@ canvas {
 
 /* deep atmosphere */
 .overlay {
+  position: fixed;
+  inset: 0;
   background: radial-gradient(
     ellipse at center,
-    rgba(0,0,0,0.10),
-    rgba(0,0,0,0.55)
+    rgba(0,0,0,0.25),
+    rgba(0,0,0,0.78)
   );
-}
   z-index: 1;
   pointer-events: none;
 }
@@ -348,19 +349,19 @@ audio {
   <img src="theatre1.jpg" id="theatreImg">
 
   <div class="right">
-    <div class="trackTitle">excerpt 01</div>
 
-    <button id="playBtn" class="playBtn">PLAY</button>
+  <div class="trackTitle">excerpt 01</div>
+
+  <button id="playBtn" class="playBtn">PLAY</button>
     <input type="range" id="progress" value="0" min="0" max="100">
 
-    <div class="trackList">
-      <button class="track" data-src="excerpt1.mp3">01</button>
-      <button class="track" data-src="excerpt2.mp3">02</button>
-      <button class="track" data-src="excerpt3.mp3">03</button>
-    </div>
+  <div class="trackList">
+    <button class="track" data-src="excerpt1.mp3">01</button>
+    <button class="track" data-src="excerpt2.mp3">02</button>
+    <button class="track" data-src="excerpt3.mp3">03</button>
   </div>
 
-</div> <!-- 👈 ВОТ ЭТОГО У ТЕБЯ НЕ ХВАТАЕТ -->
+</div>
 
 <audio id="theatreAudio" preload="none">
   <source src="excerpt1.mp3" type="audio/mpeg">
@@ -457,8 +458,8 @@ const material = new THREE.ShaderMaterial({
       vec4 color = texture2D(uTexture, uv);
 
       vec3 c = color.rgb;
-     c *= 0.95;
-c = c / (c + vec3(0.65));
+      c *= 0.85;
+      c = c / (c + vec3(0.55));
 
       gl_FragColor = vec4(c,1.0);
     }
