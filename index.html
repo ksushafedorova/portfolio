@@ -260,12 +260,9 @@ function onResize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
 
-  renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h, false);
 }
-
-window.addEventListener('resize', onResize);
-onResize();
 
 </script>
 
