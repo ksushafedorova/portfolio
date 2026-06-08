@@ -321,7 +321,7 @@ audio {
 <body>
 
 <div class="overlay"></div>
-  <div class="cloudNode" id="theatreNode"></div>
+
 
 <main>
 
@@ -388,13 +388,16 @@ texture.colorSpace = THREE.SRGBColorSpace;
 /* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
-  let isOpened = false;
-const node = document.getElementById('theatreNode');
 const img = document.getElementById('theatreImg');
 const right = document.querySelector('.right');
 const btn = document.getElementById('playBtn');
+const progress = document.getElementById('progress');
+  img?.classList.add('visible');
+right?.classList.add('show');
+btn?.classList.add('show');
+progress?.classList.add('show');
 const audio = document.getElementById('theatreAudio');
-  const progress = document.getElementById('progress');
+  
 let isPlaying = false;
   
 window.addEventListener('mousemove', (e) => {
@@ -473,36 +476,6 @@ animate();
 
 /* ✨ emergence trigger */
 
-function placeNode() {
-  node.style.left = (window.innerWidth * 0.62) + 'px';
-  node.style.top = (window.innerHeight * 0.45) + 'px';
-}
-
-placeNode();
-
-window.addEventListener('resize', placeNode);
-
-node.addEventListener('click', () => {
-
-  if (isOpened) return;
-  isOpened = true;
-
-  node.classList.add('hide');
-
-  img?.classList.add('visible');
-  right?.classList.add('show');
-  btn?.classList.add('show');
-  document.getElementById('progress')?.classList.add('show');
-
-  if (audio) {
-    audio.currentTime = 0;
-    audio.play();
-  }
-
-  if (btn) {
-    btn.textContent = "PAUSE";
-  }
-});
 btn.addEventListener('click', (e) => {
   e.stopPropagation();
 
