@@ -392,10 +392,12 @@ const img = document.getElementById('theatreImg');
 const right = document.querySelector('.right');
 const btn = document.getElementById('playBtn');
 const progress = document.getElementById('progress');
+window.addEventListener('DOMContentLoaded', () => {
   img?.classList.add('visible');
-right?.classList.add('show');
-btn?.classList.add('show');
-progress?.classList.add('show');
+  right?.classList.add('show');
+  btn?.classList.add('show');
+  progress?.classList.add('show');
+});
 const audio = document.getElementById('theatreAudio');
   
 let isPlaying = false;
