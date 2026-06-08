@@ -157,7 +157,6 @@ h1 {
 </main>
 
 <script type="module">
-
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
 
 const scene = new THREE.Scene();
@@ -166,20 +165,27 @@ const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 camera.position.z = 1;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse + memory */
+/* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
   mouse.y = 1.0 - e.clientY / window.innerHeight;
+});
+
+window.addEventListener('touchmove', (e) => {
+  const t = e.touches[0];
+  if (!t) return;
+  mouse.x = t.clientX / window.innerWidth;
+  mouse.y = 1.0 - t.clientY / window.innerHeight;
 });
 
 const geometry = new THREE.PlaneGeometry(2, 2);
@@ -232,13 +238,11 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-      float exposure = 1.10;
+      float exposure = 1.1;
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      color.rgb = c;
-
-      gl_FragColor = color;
+      gl_FragColor = vec4(c, 1.0);
     }
   `
 });
@@ -255,32 +259,9 @@ function animate(time) {
 
 animate();
 
-/* FIX: responsive resize for proper aspect */
-function onResize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const aspect = w / h;
-
-  camera.left = -aspect;
-  camera.right = aspect;
-  camera.top = 1;
-  camera.bottom = -1;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(w, h);
+/* resize ONLY renderer (важно) */
+window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-}
-
-window.addEventListener('resize', onResize);
-onResize();
-
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
-
-<script>
-function toggleMenu() {
-  document.getElementById('dropdown').classList.toggle('open');
-}
-</script>
-
-</body>
-</html>
