@@ -25,16 +25,13 @@ canvas {
   pointer-events: none;
 }
 main {
-  position: absolute;
+  position: relative;
   z-index: 10;
   width: 100%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   text-align: center;
-  pointer-events: none;
+  padding: 120px 40px;
+  box-sizing: border-box;
 }
-
 h1 {
   font-size: 38px;
   font-weight: normal;
@@ -111,8 +108,8 @@ h1 {
   }
 
    html, body {
-    overflow: hidden;
-  }
+  overflow: auto;
+}
 
   h1 {
     font-size: 28px;
