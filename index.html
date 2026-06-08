@@ -181,14 +181,7 @@ window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
   mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
- window.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-
-  const t = e.touches[0];
-
-  mouse.x = t.clientX / window.innerWidth;
-  mouse.y = 1.0 - t.clientY / window.innerHeight;
-}, { passive: false });
+ 
 
 const geometry = new THREE.PlaneGeometry(2, 2);
 
