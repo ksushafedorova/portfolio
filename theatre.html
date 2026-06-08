@@ -459,11 +459,11 @@ const material = new THREE.ShaderMaterial({
 
 vec3 c = color.rgb;
 
-/* мягкое тепло ДО всего */
-c += vec3(0.01, 0.0, -0.005);
-
 c *= 0.9;
 c = c / (c + vec3(0.5));
+
+c.r *= 1.03;
+c.b *= 0.97;
 
 gl_FragColor = vec4(c,1.0); }
   `
