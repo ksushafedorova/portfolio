@@ -348,19 +348,19 @@ audio {
   <img src="theatre1.jpg" id="theatreImg">
 
   <div class="right">
+    <div class="trackTitle">excerpt 01</div>
 
-  <div class="trackTitle">excerpt 01</div>
-
-  <button id="playBtn" class="playBtn">PLAY</button>
+    <button id="playBtn" class="playBtn">PLAY</button>
     <input type="range" id="progress" value="0" min="0" max="100">
 
-  <div class="trackList">
-    <button class="track" data-src="excerpt1.mp3">01</button>
-    <button class="track" data-src="excerpt2.mp3">02</button>
-    <button class="track" data-src="excerpt3.mp3">03</button>
+    <div class="trackList">
+      <button class="track" data-src="excerpt1.mp3">01</button>
+      <button class="track" data-src="excerpt2.mp3">02</button>
+      <button class="track" data-src="excerpt3.mp3">03</button>
+    </div>
   </div>
 
-</div>
+</div> <!-- 👈 ВОТ ЭТОГО У ТЕБЯ НЕ ХВАТАЕТ -->
 
 <audio id="theatreAudio" preload="none">
   <source src="excerpt1.mp3" type="audio/mpeg">
