@@ -57,13 +57,12 @@ canvas {
 
 /* deep atmosphere */
 .overlay {
-  position: fixed;
-  inset: 0;
   background: radial-gradient(
     ellipse at center,
-    rgba(0,0,0,0.25),
-    rgba(0,0,0,0.78)
+    rgba(0,0,0,0.10),
+    rgba(0,0,0,0.55)
   );
+}
   z-index: 1;
   pointer-events: none;
 }
@@ -458,8 +457,8 @@ const material = new THREE.ShaderMaterial({
       vec4 color = texture2D(uTexture, uv);
 
       vec3 c = color.rgb;
-      c *= 0.85;
-      c = c / (c + vec3(0.55));
+     c *= 0.95;
+c = c / (c + vec3(0.65));
 
       gl_FragColor = vec4(c,1.0);
     }
