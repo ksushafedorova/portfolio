@@ -1,3 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ksenia Fedorova</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  font-family: Arial, sans-serif;
+  color: #f2f2f2;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+main {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  text-align: center;
+  padding: 120px 40px;
+  box-sizing: border-box;
+}
+h1 {
+  font-size: 38px;
+  font-weight: normal;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #d9d9d9;
+  margin-bottom: 34px;
+}
+
+.description {
+  max-width: 650px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-size: 15px;
+  color: #cfcfcf;
+  margin-bottom: 60px;
+}
+
+.menu {
+  pointer-events: auto;
+}
+
+.stay {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 3px;
+  opacity: 0.75;
+  transition: 0.3s;
+}
+
+.stay:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.dropdown {
+  margin-top: 24px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: 0.7s ease;
+}
+
+.dropdown.open {
+  opacity: 1;
+  max-height: 400px;
+}
+
+.dropdown a {
+  display: block;
+  margin: 14px 0;
+  color: #f2f2f2;
+  text-decoration: none;
+  font-size: 15px;
+  letter-spacing: 2px;
+  opacity: 0.82;
+}
+
+.dropdown a:hover {
+  opacity: 1;
+}
+ @media (max-width: 768px) {
+
+  main {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    padding: 120px 20px;
+  }
+
+   html, body {
+  overflow: auto;
+}
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .description {
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<main>
+  <h1>Ksenia Fedorova</h1>
+
+  <div class="subtitle">
+    composer / sound artist / theatre & film music
+  </div>
+
+  <div class="description">
+    I work with theatre, film, animation and experimental sound.
+    My practice combines voice, piano, electronics and field recordings.
+  </div>
+
+  <div class="menu">
+    <div class="stay" onclick="toggleMenu()">STAY SOUND +</div>
+
+    <div class="dropdown" id="dropdown">
+      <a href="theatre.html">THEATRE TRACE</a>
+      <a href="film.html">FILM TRACE</a>
+      <a href="sound.html">SOUND TRACE</a>
+      <a href="solo.html">SOLO PRACTICE</a>
+      <a href="fragments.html">FRAGMENTS</a>
+    </div>
+  </div>
+</main>
+
 <script type="module">
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js';
@@ -8,34 +166,20 @@ const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 camera.position.z = 1;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-/* resize (простая и стабильная версия) */
-function resize() {
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
-}
-resize();
-window.addEventListener('resize', resize);
-
-/* texture */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
-/* mouse */
+/* mouse + memory */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
   mouse.y = 1.0 - e.clientY / window.innerHeight;
-});
-
-window.addEventListener('touchmove', (e) => {
-  const t = e.touches[0];
-  if (!t) return;
-  mouse.x = t.clientX / window.innerWidth;
-  mouse.y = 1.0 - t.clientY / window.innerHeight;
 });
 
 const geometry = new THREE.PlaneGeometry(2, 2);
@@ -69,19 +213,6 @@ const material = new THREE.ShaderMaterial({
 
       vec2 uv = vUv;
 
-      // ✅ FIX: cover-like aspect correction
-      float aspect = float(${window.innerWidth}.0) / float(${window.innerHeight}.0);
-
-      vec2 centered = uv - 0.5;
-
-      if (aspect > 1.0) {
-        centered.x *= aspect;
-      } else {
-        centered.y /= aspect;
-      }
-
-      uv = centered + 0.5;
-
       float d = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
 
@@ -105,7 +236,9 @@ const material = new THREE.ShaderMaterial({
       vec3 c = color.rgb * exposure;
       c = c / (c + vec3(0.42));
 
-      gl_FragColor = vec4(c, 1.0);
+      color.rgb = c;
+
+      gl_FragColor = color;
     }
   `
 });
@@ -122,4 +255,32 @@ function animate(time) {
 
 animate();
 
+/* FIX: responsive resize for proper aspect */
+function onResize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const aspect = w / h;
+
+  camera.left = -aspect;
+  camera.right = aspect;
+  camera.top = 1;
+  camera.bottom = -1;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+}
+
+window.addEventListener('resize', onResize);
+onResize();
+
 </script>
+
+<script>
+function toggleMenu() {
+  document.getElementById('dropdown').classList.toggle('open');
+}
+</script>
+
+</body>
+</html>
