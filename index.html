@@ -10,21 +10,17 @@ camera.position.z = 1;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 document.body.appendChild(renderer.domElement);
 
+/* resize (простая и стабильная версия) */
+function resize() {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* texture */
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
-
-/* IMPORTANT: initial correct sizing */
-function setSize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(w, h, false);
-}
-setSize();
-
-window.addEventListener('resize', setSize);
-window.addEventListener('orientationchange', setSize);
 
 /* mouse */
 const mouse = new THREE.Vector2(0.5, 0.5);
@@ -35,7 +31,6 @@ window.addEventListener('mousemove', (e) => {
   mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
 
-/* touch */
 window.addEventListener('touchmove', (e) => {
   const t = e.touches[0];
   if (!t) return;
@@ -73,6 +68,19 @@ const material = new THREE.ShaderMaterial({
     void main() {
 
       vec2 uv = vUv;
+
+      // ✅ FIX: cover-like aspect correction
+      float aspect = float(${window.innerWidth}.0) / float(${window.innerHeight}.0);
+
+      vec2 centered = uv - 0.5;
+
+      if (aspect > 1.0) {
+        centered.x *= aspect;
+      } else {
+        centered.y /= aspect;
+      }
+
+      uv = centered + 0.5;
 
       float d = distance(uv, uMouse);
       float dp = distance(uv, uPrevMouse);
