@@ -214,14 +214,6 @@ uniform vec2 uResolution;
 
       vec2 uv = vUv;
 
-float screenAspect = uResolution.x / uResolution.y;
-float imageAspect = 1920.0 / 1080.0;
-
-if (screenAspect > imageAspect) {
-    uv.x = (uv.x - 0.5) * (screenAspect / imageAspect) + 0.5;
-} else {
-    uv.y = (uv.y - 0.5) * (imageAspect / screenAspect) + 0.5;
-}
 
 
 
@@ -271,10 +263,14 @@ animate();
 function onResize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-
+camera.left = -aspect;
+  camera.right = aspect;
+  camera.top = 1;
+  camera.bottom = -1;
+  camera.updateProjectionMatrix();
+ 
   renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-material.uniforms.uResolution.value.set(w, h);
 }
 
 window.addEventListener('resize', onResize);
