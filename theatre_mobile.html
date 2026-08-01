@@ -408,6 +408,13 @@ window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX / window.innerWidth;
   mouse.y = 1.0 - e.clientY / window.innerHeight;
 });
+ window.addEventListener('touchmove', (e) => {
+  const t = e.touches[0];
+  if (!t) return;
+
+  mouse.x = t.clientX / window.innerWidth;
+  mouse.y = 1.0 - t.clientY / window.innerHeight;
+});
 
 const geometry = new THREE.PlaneGeometry(2,2);
 
