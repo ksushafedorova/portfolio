@@ -58,15 +58,7 @@ canvas {
 
 /* deep atmosphere */
 .overlay {
-  position: fixed;
-  inset: 0;
- background: radial-gradient(
-  ellipse at center,
-  rgba(0,0,0,0.18),
-  rgba(0,0,0,0.62)
-);
-  z-index: 1;
-  pointer-events: none;
+ display:none;
 }
 
 /* layout */
@@ -383,7 +375,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
 camera.position.z = 1;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
@@ -464,16 +456,13 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-vec3 c = color.rgb;
-c.r *= 1.03;
-c.b *= 0.97;
+float exposure = 1.10;
+vec3 c = color.rgb * exposure;
+c = c / (c + vec3(0.42));
 
-c *= 0.9;
-c = c / (c + vec3(0.5));
+color.rgb = c;
 
-gl_FragColor = vec4(c,1.0); }
-  `
-});
+gl_FragColor = color;
 
 scene.add(new THREE.Mesh(geometry, material));
 
