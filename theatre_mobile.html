@@ -466,12 +466,11 @@ const material = new THREE.ShaderMaterial({
 
       vec4 color = texture2D(uTexture, uv);
 
-vec3 c = color.rgb;
-c.r *= 1.03;
-c.b *= 0.97;
+float exposure = 1.10;
+vec3 c = color.rgb * exposure;
+c = c / (c + vec3(0.42));
 
-c *= 0.9;
-c = c / (c + vec3(0.5));
+color.rgb = c;
 
 gl_FragColor = vec4(c,1.0); }
   `
