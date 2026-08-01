@@ -176,7 +176,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-const texture = new THREE.TextureLoader().load('clouds_mobile.jpg');
+const texture = new THREE.TextureLoader().load('clouds_mobile.jpg', function(img) {
+  console.log('IMAGE OK');
+});
+
 texture.colorSpace = THREE.SRGBColorSpace;
 
 /* mouse + memory */
