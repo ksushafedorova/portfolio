@@ -170,7 +170,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
-const texture = new THREE.TextureLoader().load('clouds.jpg');
+const image =
+  window.innerWidth <= 768
+    ? 'clouds_mobile.jpg'
+    : 'clouds.jpg';
+
+const texture = new THREE.TextureLoader().load(image);
 texture.colorSpace = THREE.SRGBColorSpace;
 
 /* mouse + memory */
