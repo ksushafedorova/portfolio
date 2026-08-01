@@ -213,18 +213,7 @@ const material = new THREE.ShaderMaterial({
     void main() {
 
       vec2 uv = vUv;
-float screenAspect = 1.0;
-float imageAspect = 1920.0 / 1080.0;
 
-vec2 scale = vec2(1.0);
-
-if (screenAspect > imageAspect) {
-  scale.x = imageAspect / screenAspect;
-} else {
-  scale.y = screenAspect / imageAspect;
-}
-
-uv = (uv - 0.5) * scale + 0.5;
 
 
       float d = distance(uv, uMouse);
