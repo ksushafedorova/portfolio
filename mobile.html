@@ -180,11 +180,19 @@ texture.colorSpace = THREE.SRGBColorSpace;
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
 
-window.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - e.clientY / window.innerHeight;
+window.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+
+  mouse.x = touch.clientX / window.innerWidth;
+  mouse.y = 1.0 - touch.clientY / window.innerHeight;
 });
 
+window.addEventListener('touchmove', (e) => {
+  const touch = e.touches[0];
+
+  mouse.x = touch.clientX / window.innerWidth;
+  mouse.y = 1.0 - touch.clientY / window.innerHeight;
+});
 const geometry = new THREE.PlaneGeometry(2, 2);
 
 const material = new THREE.ShaderMaterial({
