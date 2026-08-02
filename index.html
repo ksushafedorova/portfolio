@@ -191,14 +191,6 @@ function startAudio() {
     audio.play();
 
     audioStarted = true;
-
-    let fade = setInterval(() => {
-      if (audio.volume < 0.8) {
-        audio.volume += 0.02;
-      } else {
-        clearInterval(fade);
-      }
-    }, 30);
   }
 }
 
@@ -215,7 +207,10 @@ window.addEventListener('mousemove', (e) => {
     Math.abs(e.movementY);
 
   targetVolume = Math.min(speed / 50, 0.8);
-
+if (audio.paused && targetVolume > 0.02) {
+  audio.currentTime = 0;
+  audio.play();
+}
 });
 
 function updateAudio() {
@@ -223,6 +218,10 @@ function updateAudio() {
   audio.volume += (targetVolume - audio.volume) * 0.12;
 
   targetVolume *= 0.92;
+
+  if (audio.volume < 0.01 && !audio.paused) {
+    audio.pause();
+  }
 
   requestAnimationFrame(updateAudio);
 }
