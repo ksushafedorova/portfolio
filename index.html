@@ -196,10 +196,7 @@ filter.connect(audioContext.destination);
 
 let audioStarted = false;
 
-function startAudio() 
-window.addEventListener('pointerdown', () => {
-  startAudio();
-});{
+function startAudio() {
   if (!audioStarted) {
     audio.volume = 0;
     audio.play();
@@ -215,6 +212,10 @@ window.addEventListener('pointerdown', () => {
     }, 30);
   }
 }
+
+window.addEventListener('pointerdown', () => {
+  startAudio();
+});
 
 
 let targetVolume = 0;
