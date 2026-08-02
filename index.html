@@ -213,23 +213,7 @@ function startAudio() {
   }
 }
 
-let targetVolume = 0;
 
-window.addEventListener('pointerdown', () => {
-  startAudio();
-});
-
-window.addEventListener('mousemove', (e) => {
-mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - e.clientY / window.innerHeight;
-
-  const speed =
-    Math.abs(e.movementX) +
-    Math.abs(e.movementY);
-
-  targetVolume = Math.min(speed / 50, 0.8);
-
-});
 function updateAudio() {
 
  audio.volume += (targetVolume - audio.volume) * 0.06;
@@ -243,7 +227,9 @@ updateAudio();
 /* mouse + memory */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
+ let targetVolume = 0;
 let mouseSpeed = 0;
+
 window.addEventListener('mousemove', (e) => {
 
   const newX = e.clientX / window.innerWidth;
@@ -256,6 +242,17 @@ window.addEventListener('mousemove', (e) => {
 
   mouse.x = newX;
   mouse.y = newY;
+
+
+  const speed =
+    Math.abs(e.movementX) +
+    Math.abs(e.movementY);
+
+  targetVolume = Math.min(speed / 50, 0.8);
+
+  filter.frequency.value =
+    400 + Math.min(speed * 80, 4000);
+
 });
 
 const geometry = new THREE.PlaneGeometry(2, 2);
