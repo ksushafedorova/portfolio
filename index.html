@@ -192,9 +192,32 @@ function startAudio() {
   }
 }
 
+let targetVolume = 0;
+
 window.addEventListener('pointerdown', () => {
   startAudio();
 });
+
+window.addEventListener('mousemove', (e) => {
+
+  const speed =
+    Math.abs(e.movementX) +
+    Math.abs(e.movementY);
+
+  targetVolume = Math.min(speed / 200, 0.5);
+
+});
+
+function updateAudio() {
+
+  audio.volume += (targetVolume - audio.volume) * 0.05;
+
+  targetVolume *= 0.96;
+
+  requestAnimationFrame(updateAudio);
+}
+
+updateAudio();
 /* mouse + memory */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
