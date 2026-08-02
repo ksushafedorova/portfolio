@@ -241,7 +241,7 @@ window.addEventListener('mousemove', (e) => {
     newX - mouse.x,
     newY - mouse.y
   );
-
+targetVolume = Math.min(mouseSpeed * 20, 0.8);
   mouse.x = newX;
   mouse.y = newY;
 });
