@@ -179,6 +179,22 @@ document.body.appendChild(renderer.domElement);
 const texture = new THREE.TextureLoader().load('clouds.jpg');
 texture.colorSpace = THREE.SRGBColorSpace;
 
+const audio = new Audio('atmosphere.mp3');
+audio.loop = true;
+audio.volume = 0.5;
+
+let audioStarted = false;
+
+function startAudio() {
+  if (!audioStarted) {
+    audio.play();
+    audioStarted = true;
+  }
+}
+
+window.addEventListener('pointerdown', () => {
+  startAudio();
+});
 /* mouse + memory */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
