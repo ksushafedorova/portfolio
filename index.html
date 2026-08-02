@@ -181,7 +181,18 @@ texture.colorSpace = THREE.SRGBColorSpace;
 
 const audio = new Audio('atmosphere.mp3');
 audio.loop = true;
-audio.volume = 0.5;
+audio.volume = 0;
+
+const audioContext = new AudioContext();
+
+const source = audioContext.createMediaElementSource(audio);
+
+const filter = audioContext.createBiquadFilter();
+filter.type = "lowpass";
+filter.frequency.value = 400;
+
+source.connect(filter);
+filter.connect(audioContext.destination);
 
 let audioStarted = false;
 
@@ -209,6 +220,8 @@ window.addEventListener('pointerdown', () => {
 });
 
 window.addEventListener('mousemove', (e) => {
+mouse.x = e.clientX / window.innerWidth;
+  mouse.y = 1.0 - e.clientY / window.innerHeight;
 
   const speed =
     Math.abs(e.movementX) +
@@ -217,12 +230,11 @@ window.addEventListener('mousemove', (e) => {
   targetVolume = Math.min(speed / 50, 0.8);
 
 });
-
 function updateAudio() {
 
-  audio.volume += (targetVolume - audio.volume) * 0.12;
+ audio.volume += (targetVolume - audio.volume) * 0.06;
 
-  targetVolume *= 0.92;
+  targetVolume *= 0.97;
 
   requestAnimationFrame(updateAudio);
 }
