@@ -196,7 +196,10 @@ filter.connect(audioContext.destination);
 
 let audioStarted = false;
 
-function startAudio() {
+function startAudio() 
+window.addEventListener('pointerdown', () => {
+  startAudio();
+});{
   if (!audioStarted) {
     audio.volume = 0;
     audio.play();
@@ -214,16 +217,21 @@ function startAudio() {
 }
 
 
+let targetVolume = 0;
+let mouseSpeed = 0;
+
+/* mouse + memory */
+const mouse = new THREE.Vector2(0.5, 0.5);
+const prevMouse = new THREE.Vector2(0.5, 0.5);
+
 function updateAudio() {
 
- audio.volume += (targetVolume - audio.volume) * 0.06;
+  audio.volume += (targetVolume - audio.volume) * 0.06;
 
   targetVolume *= 0.97;
 
   requestAnimationFrame(updateAudio);
 }
- let targetVolume = 0;
-let mouseSpeed = 0;
 
 window.addEventListener('mousemove', (e) => {
 
@@ -250,8 +258,7 @@ window.addEventListener('mousemove', (e) => {
 });
 updateAudio();
 /* mouse + memory */
-const mouse = new THREE.Vector2(0.5, 0.5);
-const prevMouse = new THREE.Vector2(0.5, 0.5);
+
 
 
 const geometry = new THREE.PlaneGeometry(2, 2);
