@@ -182,10 +182,19 @@ texture.colorSpace = THREE.SRGBColorSpace;
 /* mouse + memory */
 const mouse = new THREE.Vector2(0.5, 0.5);
 const prevMouse = new THREE.Vector2(0.5, 0.5);
-
+let mouseSpeed = 0;
 window.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX / window.innerWidth;
-  mouse.y = 1.0 - e.clientY / window.innerHeight;
+
+  const newX = e.clientX / window.innerWidth;
+  const newY = 1.0 - e.clientY / window.innerHeight;
+
+  mouseSpeed = Math.hypot(
+    newX - mouse.x,
+    newY - mouse.y
+  );
+
+  mouse.x = newX;
+  mouse.y = newY;
 });
 
 const geometry = new THREE.PlaneGeometry(2, 2);
