@@ -217,7 +217,7 @@ function updateAudio() {
 
   audio.volume += (targetVolume - audio.volume) * 0.12;
 
-  targetVolume *= 0.92;
+  targetVolume *= 0.96;
 
   if (audio.volume < 0.01 && !audio.paused) {
     audio.pause();
