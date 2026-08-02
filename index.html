@@ -189,7 +189,7 @@ const source = audioContext.createMediaElementSource(audio);
 
 const filter = audioContext.createBiquadFilter();
 filter.type = "lowpass";
-filter.frequency.value = 400;
+filter.frequency.value = 4000;
 
 source.connect(filter);
 filter.connect(audioContext.destination);
@@ -222,11 +222,6 @@ function updateAudio() {
 
   requestAnimationFrame(updateAudio);
 }
-
-updateAudio();
-/* mouse + memory */
-const mouse = new THREE.Vector2(0.5, 0.5);
-const prevMouse = new THREE.Vector2(0.5, 0.5);
  let targetVolume = 0;
 let mouseSpeed = 0;
 
@@ -250,10 +245,14 @@ window.addEventListener('mousemove', (e) => {
 
   targetVolume = Math.min(speed / 50, 0.8);
 
-  filter.frequency.value =
-    400 + Math.min(speed * 80, 4000);
+
 
 });
+updateAudio();
+/* mouse + memory */
+const mouse = new THREE.Vector2(0.5, 0.5);
+const prevMouse = new THREE.Vector2(0.5, 0.5);
+
 
 const geometry = new THREE.PlaneGeometry(2, 2);
 
