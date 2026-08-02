@@ -187,8 +187,18 @@ let audioStarted = false;
 
 function startAudio() {
   if (!audioStarted) {
+    audio.volume = 0;
     audio.play();
+
     audioStarted = true;
+
+    let fade = setInterval(() => {
+      if (audio.volume < 0.8) {
+        audio.volume += 0.02;
+      } else {
+        clearInterval(fade);
+      }
+    }, 30);
   }
 }
 
@@ -212,7 +222,7 @@ function updateAudio() {
 
   audio.volume += (targetVolume - audio.volume) * 0.12;
 
-  targetVolume *= 0.96;
+  targetVolume *= 0.92;
 
   requestAnimationFrame(updateAudio);
 }
