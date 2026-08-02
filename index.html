@@ -204,13 +204,13 @@ window.addEventListener('mousemove', (e) => {
     Math.abs(e.movementX) +
     Math.abs(e.movementY);
 
-  targetVolume = Math.min(speed / 200, 0.5);
+  targetVolume = Math.min(speed / 50, 0.8);
 
 });
 
 function updateAudio() {
 
-  audio.volume += (targetVolume - audio.volume) * 0.05;
+  audio.volume += (targetVolume - audio.volume) * 0.12;
 
   targetVolume *= 0.96;
 
